@@ -1,0 +1,140 @@
+@model Masdar.Web.ViewModels.ResourceDetailsViewModel
+@{
+    ViewData["Title"] = Model.Resource.Title;
+    ViewData["BodyClass"] = "prototype-study-page";
+    var filledStars = Math.Clamp((int)Math.Round(Model.Resource.AverageRating, MidpointRounding.AwayFromZero), 0, 5);
+    var tutorQuestion = $"Help me study {Model.Resource.Title}";
+    var tutorReturnUrl = Url.Action("Index", "Tutor", new { question = tutorQuestion }) ?? "/Tutor";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/prototype-pages.css" asp-append-version="true" /> }
+
+<nav class="prototype-breadcrumb" aria-label="Breadcrumb">
+    <a asp-action="Index">Explore resources</a><span aria-hidden="true">›</span>
+    <a asp-action="Index" asp-route-courseId="@Model.Resource.CourseId">@Model.Resource.CourseCode</a><span aria-hidden="true">›</span>
+    <span aria-current="page">Resource details</span>
+</nav>
+
+<header class="resource-detail-head">
+    <div>
+        <div class="resource-detail-badges">
+            <span class="resource-detail-type">@Model.Resource.Type</span>
+            @if (Model.Resource.IsVerified) { <span class="resource-detail-verified"><span aria-hidden="true">✓</span> Community verified</span> }
+            @if (Model.Resource.IsRepresentative) { <span class="resource-detail-representative">Representative of course style</span> }
+        </div>
+        <h1>@Model.Resource.Title</h1>
+        <p>@Model.Resource.CourseCode · @Model.Resource.Semester · Shared by <strong>@Model.Resource.UploaderName</strong></p>
+    </div>
+    <a class="prototype-primary-action resource-download-main" asp-action="Download" asp-route-id="@Model.Resource.Id"><span aria-hidden="true">⇩</span> Download original</a>
+</header>
+
+<div class="resource-detail-layout">
+    <section aria-label="Resource preview and file details">
+        <section id="resource-preview" class="resource-preview-card" aria-labelledby="resource-preview-title">
+            <div class="resource-preview-heading">
+                <span class="preview-file-icon" aria-hidden="true">▤</span>
+                <div><p>Resource preview</p><h2 id="resource-preview-title">What this material covers</h2></div>
+            </div>
+            <div class="resource-preview-copy">
+                <p>@(string.IsNullOrWhiteSpace(Model.Resource.Description) ? "A written preview was not supplied for this resource. Download the original file to review its complete contents." : Model.Resource.Description)</p>
+            </div>
+            @if (Model.Resource.Tags.Count > 0)
+            {
+                <div class="resource-detail-tags" aria-label="Resource tags">
+                    @foreach (var tag in Model.Resource.Tags) { <a asp-action="Index" asp-route-search="@tag">#@tag</a> }
+                </div>
+            }
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(Model.TutorContext))
+        {
+            <section class="resource-study-context" aria-labelledby="study-context-title">
+                <span class="study-context-icon" aria-hidden="true">✦</span>
+                <div><p>Course-aware context</p><h2 id="study-context-title">Ready for grounded study help</h2><div class="study-context-copy">@Model.TutorContext</div></div>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form class="resource-context-tutor-form" asp-action="SetActiveCourse" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Resource.CourseId" />
+                        <input type="hidden" name="returnUrl" value="@tutorReturnUrl" />
+                        <button type="submit">Ask the tutor <span aria-hidden="true">→</span></button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path">Sign in to ask <span aria-hidden="true">→</span></a>
+                }
+            </section>
+        }
+
+        <section class="resource-file-panel" aria-labelledby="file-panel-title">
+            <div><p>Original file</p><h2 id="file-panel-title">@Model.OriginalFileName</h2><span>@((Model.FileSizeBytes / 1024d / 1024d).ToString("0.##")) MB · @Model.ContentType · Published @Model.PublishedAtUtc.ToLocalTime().ToString("MMM d, yyyy")</span></div>
+            <a asp-action="Download" asp-route-id="@Model.Resource.Id">Download <span aria-hidden="true">⇩</span></a>
+        </section>
+    </section>
+
+    <aside class="resource-quality-sidebar" aria-label="Resource quality and actions">
+        <section class="resource-quality-panel">
+            <p class="quality-panel-label">Community quality</p>
+            <div class="quality-score-large"><strong>@(Model.Resource.RatingCount == 0 ? "New" : Model.Resource.AverageRating.ToString("0.0"))</strong>@if (Model.Resource.RatingCount > 0) { <span>/ 5</span> }</div>
+            <div class="quality-stars" aria-label="Average rating @Model.Resource.AverageRating out of 5">
+                @for (var star = 1; star <= 5; star++)
+                {
+                    <span aria-hidden="true">@(star <= filledStars ? "★" : "☆")</span>
+                }
+            </div>
+            <p>@Model.Resource.RatingCount @(Model.Resource.RatingCount == 1 ? "rating" : "ratings") from students in this course.</p>
+            <div class="quality-signal-grid">
+                <div><strong>@Model.Resource.HelpfulCount</strong><span>Helpful votes</span></div>
+                <div><strong>@(Model.Resource.IsRepresentative ? "Yes" : "—")</strong><span>Representative</span></div>
+                <div><strong>@(Model.Resource.IsVerified ? "Verified" : "Reviewing")</strong><span>Trust status</span></div>
+            </div>
+        </section>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <section class="resource-action-panel">
+                <h2>Was this useful?</h2>
+                <div class="resource-action-row">
+                    <form asp-action="ToggleHelpful" method="post">
+                        @Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Resource.Id" />
+                        <button class="detail-action-button @(Model.Resource.IsHelpful ? "is-active" : "")" type="submit">♡ @(Model.Resource.IsHelpful ? "Helpful ✓" : "Mark helpful")</button>
+                    </form>
+                    <form asp-action="ToggleSave" method="post">
+                        @Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Resource.Id" />
+                        <button class="detail-action-button @(Model.Resource.IsSaved ? "is-active" : "")" type="submit">◇ @(Model.Resource.IsSaved ? "Saved ✓" : "Save")</button>
+                    </form>
+                </div>
+
+                <h2 class="rating-heading">Rate this resource</h2>
+                <div class="detail-star-actions" role="group" aria-label="Rate this resource">
+                    @for (var rating = 1; rating <= 5; rating++)
+                    {
+                        <form asp-action="Rate" method="post">
+                            @Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Resource.Id" /><input type="hidden" name="rating" value="@rating" />
+                            <button class="@(Model.Resource.UserRating.GetValueOrDefault() >= rating ? "is-active" : "")" type="submit" aria-label="Rate @rating out of 5" aria-pressed="@(Model.Resource.UserRating == rating)">★</button>
+                        </form>
+                    }
+                </div>
+            </section>
+        }
+        else
+        {
+            <section class="resource-signin-panel"><h2>Improve this resource</h2><p>Sign in to rate, save, and mark this material as helpful.</p><a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path">Sign in</a></section>
+        }
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form class="resource-tutor-form" asp-action="SetActiveCourse" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Resource.CourseId" />
+                <input type="hidden" name="returnUrl" value="@tutorReturnUrl" />
+                <button class="resource-tutor-cta" type="submit"><span aria-hidden="true">✦</span><span><strong>Ask about this resource</strong><small>Uses this course as tutor context</small></span><span aria-hidden="true">→</span></button>
+            </form>
+        }
+        else
+        {
+            <a class="resource-tutor-cta" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path"><span aria-hidden="true">✦</span><span><strong>Sign in to ask the tutor</strong><small>Uses this course as tutor context</small></span><span aria-hidden="true">→</span></a>
+        }
+    </aside>
+</div>

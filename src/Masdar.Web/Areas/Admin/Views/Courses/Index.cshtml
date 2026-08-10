@@ -1,0 +1,8 @@
+@model IReadOnlyList<Course>
+@{ ViewData["Title"] = "Courses"; var majors = ViewBag.Majors as IReadOnlyList<Major> ?? Array.Empty<Major>(); }
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">Academic catalog</span><h1>Courses</h1><p>Manage course context, instructors, semesters, and exam dates.</p></div><a class="btn btn-primary" asp-action="Create">Add course</a></header>
+<form method="get" class="card filter-bar"><input type="search" name="query" value="@ViewBag.Query" placeholder="Code, name, or instructor" /><select name="majorId"><option value="">All majors</option>@foreach(var item in majors){<option value="@item.Id" selected="@(ViewBag.MajorId == item.Id)">@item.University.Name — @item.Name</option>}</select><button class="btn btn-primary" type="submit">Filter</button></form>
+<div class="card table-shell"><table class="data-table"><thead><tr><th>Course</th><th>Major</th><th>Instructor</th><th>Resources</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var item in Model) { <tr><td><strong>@item.Code</strong><small>@item.Name · @item.Semester</small></td><td>@item.Major.Name<small>@item.Major.University.Name</small></td><td>@item.Instructor</td><td>@item.Resources.Count</td><td><span class="badge @(item.IsActive ? "badge-green" : "badge-gray")">@(item.IsActive ? "Active" : "Inactive")</span></td><td><div class="table-actions"><a class="btn btn-secondary btn-small" asp-action="Edit" asp-route-id="@item.Id">Edit</a><form asp-action="Toggle" asp-route-id="@item.Id" method="post"><button class="btn btn-soft btn-small" type="submit">@(item.IsActive ? "Deactivate" : "Activate")</button></form></div></td></tr> }
+</tbody></table></div>

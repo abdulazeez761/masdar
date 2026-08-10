@@ -1,0 +1,24 @@
+@page
+@model Masdar.Web.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Create your account";
+}
+<section class="auth-shell">
+    <div class="auth-copy">
+        <span class="eyebrow">Join the community</span>
+        <h1>Study with better sources.</h1>
+        <p>Save trusted materials, follow a course roadmap, request missing resources, and help other students.</p>
+        <ul class="auth-benefits"><li>Course-aware discovery</li><li>Community quality signals</li><li>Personal progress and reputation</li></ul>
+    </div>
+    <form method="post" class="card auth-card">
+        <h2>Create your MASDAR account</h2>
+        <p>Already a member? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Sign in</a>.</p>
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+        <div class="field"><label asp-for="Input.DisplayName"></label><input asp-for="Input.DisplayName" autocomplete="name" autofocus /><span asp-validation-for="Input.DisplayName"></span></div>
+        <div class="field"><label asp-for="Input.Email"></label><input asp-for="Input.Email" autocomplete="username" /><span asp-validation-for="Input.Email"></span></div>
+        <div class="field"><label asp-for="Input.Password"></label><input asp-for="Input.Password" autocomplete="new-password" /><span asp-validation-for="Input.Password"></span></div>
+        <div class="field"><label asp-for="Input.ConfirmPassword"></label><input asp-for="Input.ConfirmPassword" autocomplete="new-password" /><span asp-validation-for="Input.ConfirmPassword"></span></div>
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+    </form>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,46 @@
+@model Masdar.Web.ViewModels.ExplorerResourceCardViewModel
+@{
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<article class="quality-resource-card">
+    <div class="quality-card-top">
+        <span class="resource-kind resource-kind-@Model.TypeKey"><span class="resource-kind-icon" aria-hidden="true"></span>@Model.Type</span>
+        <span class="quality-card-signals">
+            @if (Model.IsVerified) { <span class="verified-signal"><span aria-hidden="true">✓</span> Verified</span> }
+            @if (Model.IsRepresentative) { <span class="representative-signal" title="Representative of the course style">Rep.</span> }
+        </span>
+    </div>
+
+    <h2><a asp-controller="Resources" asp-action="Details" asp-route-id="@Model.Id">@Model.Title</a></h2>
+    <p class="quality-card-course">@Model.CourseCode · @Model.Semester</p>
+    <p class="quality-card-uploader">Shared by @Model.UploaderName</p>
+
+    @if (Model.Tags.Count > 0)
+    {
+        <div class="quality-card-tags" aria-label="Resource tags">
+            @foreach (var tag in Model.Tags.Take(4)) { <span>#@tag</span> }
+        </div>
+    }
+
+    <div class="quality-card-metrics">
+        <div class="quality-rating" aria-label="@Model.AverageRating.ToString("0.0") out of 5 from @Model.RatingCount ratings">
+            <div><strong>@(Model.RatingCount == 0 ? "New" : Model.AverageRating.ToString("0.0"))</strong><span>@Model.QualityLabel · @Model.RatingCount ratings</span></div>
+            <span class="quality-meter" aria-hidden="true"><i style="width:@Model.QualityPercent%"></i></span>
+        </div>
+        <span class="helpful-count"><span aria-hidden="true">♡</span> @Model.HelpfulCount helpful</span>
+    </div>
+
+    <div class="quality-card-actions">
+        <a class="preview-resource-action" asp-controller="Resources" asp-action="Details" asp-route-id="@Model.Id" asp-fragment="resource-preview"><span aria-hidden="true">◉</span> Preview</a>
+        <a class="details-resource-action" asp-controller="Resources" asp-action="Details" asp-route-id="@Model.Id">Details <span aria-hidden="true">→</span></a>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form asp-controller="Resources" asp-action="ToggleSave" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <button class="card-save-action @(Model.IsSaved ? "is-saved" : "")" type="submit" aria-label="@(Model.IsSaved ? $"Remove {Model.Title} from saved resources" : $"Save {Model.Title}")" aria-pressed="@Model.IsSaved">@(Model.IsSaved ? "◆" : "◇")</button>
+            </form>
+        }
+    </div>
+</article>

@@ -1,0 +1,273 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Masdar.Web.Domain.Entities.ApplicationUser> ShellUserManager
+@inject Masdar.Web.Services.ICourseService ShellCourseService
+@{
+    var routeController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    var routeAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
+    var routeArea = ViewContext.RouteData.Values["area"]?.ToString() ?? string.Empty;
+    var pageTitle = ViewData["Title"]?.ToString();
+    var documentTitle = string.IsNullOrWhiteSpace(pageTitle) ? "MASDAR" : $"{pageTitle} | MASDAR";
+    var bodyClass = ViewData["BodyClass"]?.ToString() ?? string.Empty;
+
+    var shellUserId = ShellUserManager.GetUserId(User);
+    Masdar.Web.Services.CourseListItem? shellCourse = null;
+    if (!string.IsNullOrWhiteSpace(shellUserId))
+    {
+        shellCourse = await ShellCourseService.GetActiveCourseAsync(shellUserId, Context.RequestAborted);
+    }
+
+    var viewedCourseCode = ViewData["ActiveCourseCode"]?.ToString()
+        ?? ViewData["CourseCode"]?.ToString();
+    var viewedCourseName = ViewData["ActiveCourseName"]?.ToString()
+        ?? ViewData["CourseName"]?.ToString();
+    // For signed-in students the shell must reflect persisted tutor context, not
+    // whichever course or resource happens to be open in the current request.
+    var activeCourseCode = shellCourse?.Code
+        ?? (string.IsNullOrWhiteSpace(shellUserId) ? viewedCourseCode : null)
+        ?? "No active course";
+    var activeCourseName = shellCourse?.Name
+        ?? (string.IsNullOrWhiteSpace(shellUserId) ? viewedCourseName : null)
+        ?? "Choose a course to begin";
+
+    Func<string, bool> controllerIs = name =>
+        string.IsNullOrWhiteSpace(routeArea)
+        && string.Equals(routeController, name, StringComparison.OrdinalIgnoreCase);
+    Func<string, string> desktopNavClass = name =>
+        controllerIs(name) ? "side-link active" : "side-link";
+    Func<string, string> mobileNavClass = name =>
+        controllerIs(name) ? "mobile-link active" : "mobile-link";
+
+    var statusMessage = TempData["StatusMessage"]?.ToString();
+    var successMessage = TempData["SuccessMessage"]?.ToString()
+        ?? TempData["Success"]?.ToString();
+    var errorMessage = TempData["ErrorMessage"]?.ToString()
+        ?? TempData["Error"]?.ToString();
+    var warningMessage = TempData["WarningMessage"]?.ToString()
+        ?? TempData["Warning"]?.ToString();
+    var infoMessage = TempData["InfoMessage"]?.ToString()
+        ?? TempData["Info"]?.ToString();
+
+    if (!string.IsNullOrWhiteSpace(statusMessage))
+    {
+        if (statusMessage.StartsWith("Error", StringComparison.OrdinalIgnoreCase))
+        {
+            errorMessage ??= statusMessage;
+        }
+        else
+        {
+            successMessage ??= statusMessage;
+        }
+    }
+}
+<!doctype html>
+<html lang="en" dir="ltr" data-language="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#081126" />
+    <meta name="description" content="MASDAR — your university knowledge hub." />
+    <title>@documentTitle</title>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <script>
+        (() => {
+            try {
+                const savedTheme = localStorage.getItem("masdar-theme");
+                const preferredTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                document.documentElement.dataset.theme = savedTheme || preferredTheme;
+                const savedLanguage = localStorage.getItem("masdar-language") === "ar" ? "ar" : "en";
+                document.documentElement.dataset.language = savedLanguage;
+                document.documentElement.lang = savedLanguage;
+                document.documentElement.dir = savedLanguage === "ar" ? "rtl" : "ltr";
+            } catch (_) {
+                document.documentElement.dataset.theme = "light";
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @if (string.Equals(routeArea, "Admin", StringComparison.OrdinalIgnoreCase))
+    {
+        <link rel="stylesheet" href="~/css/admin-dashboard.css" asp-append-version="true" />
+    }
+    @await RenderSectionAsync("Styles", required: false)
+    <link rel="stylesheet" href="~/css/enhancements.css" asp-append-version="true" />
+</head>
+<body class="masdar-app @bodyClass" data-controller="@routeController" data-action="@routeAction" data-area="@routeArea">
+    <a class="skip-link" href="#main-content" data-i18n="skipContent">Skip to main content</a>
+
+    <svg class="icon-sprite" aria-hidden="true" focusable="false">
+        <symbol id="icon-library" viewBox="0 0 24 24"><path d="m16 6 4 14M12 6v14M8 8v12M4 4v16M2 20h20M15 4l4-1 1 3-4 1-1-3Z" /></symbol>
+        <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8" /><path d="M5 10v10h14V10M9 20v-6h6v6" /></symbol>
+        <symbol id="icon-book" viewBox="0 0 24 24"><path d="M2 6.5A2.5 2.5 0 0 1 4.5 4H11a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2V6.5Z" /><path d="M22 6.5A2.5 2.5 0 0 0 19.5 4H17a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h5V6.5Z" /></symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></symbol>
+        <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5" /><path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" /></symbol>
+        <symbol id="icon-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></symbol>
+        <symbol id="icon-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.1 3.4a3.6 3.6 0 0 1-2.3 2.3L5 10l3.6 1.2a3.6 3.6 0 0 1 2.3 2.3L12 17l1.1-3.5a3.6 3.6 0 0 1 2.3-2.3L19 10l-3.6-1.3a3.6 3.6 0 0 1-2.3-2.3L12 3Z" /><path d="m5 3-.4 1.2a1.8 1.8 0 0 1-1.2 1.2L2 6l1.4.5a1.8 1.8 0 0 1 1.2 1.2L5 9l.5-1.3a1.8 1.8 0 0 1 1.2-1.2L8 6l-1.3-.5a1.8 1.8 0 0 1-1.2-1.2L5 3Z" /><path d="m19 16-.5 1.4a1.8 1.8 0 0 1-1.1 1.1L16 19l1.4.5a1.8 1.8 0 0 1 1.1 1.1L19 22l.5-1.4a1.8 1.8 0 0 1 1.1-1.1L22 19l-1.4-.5a1.8 1.8 0 0 1-1.1-1.1L19 16Z" /></symbol>
+        <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></symbol>
+        <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20.8 15.1A9 9 0 0 1 8.9 3.2 9 9 0 1 0 20.8 15.1Z" /></symbol>
+        <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41" /></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><path d="m20 6-11 11-5-5" /></symbol>
+        <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10.3 3.7 2.5 17.2A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.8L13.7 3.7a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 17h.01" /></symbol>
+        <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></symbol>
+        <symbol id="icon-x" viewBox="0 0 24 24"><path d="m18 6-12 12M6 6l12 12" /></symbol>
+        <symbol id="icon-log-in" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" /></symbol>
+        <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z" /></symbol>
+        <symbol id="icon-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /><path d="m9 12 2 2 4-4" /></symbol>
+    </svg>
+
+    <aside class="sidebar" aria-label="Primary navigation">
+        <a class="brand" asp-area="" asp-controller="Home" asp-action="Index" aria-label="Go to MASDAR home">
+            <span class="brand-mark"><svg aria-hidden="true"><use href="#icon-library"></use></svg></span>
+            <span class="brand-copy">
+                <span class="brand-name">MASDAR</span>
+                <span class="brand-ar" lang="ar" dir="rtl">مصدر</span>
+            </span>
+        </a>
+
+        <div class="side-label" data-i18n="workspace">Workspace</div>
+        <nav class="side-nav" aria-label="Workspace">
+            <a class="@desktopNavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index" aria-current="@(controllerIs("Home") ? "page" : null)">
+                <svg aria-hidden="true"><use href="#icon-home"></use></svg><span data-i18n="home">Home</span>
+            </a>
+            <a class="@desktopNavClass("Courses")" asp-area="" asp-controller="Courses" asp-action="Index" aria-current="@(controllerIs("Courses") ? "page" : null)">
+                <svg aria-hidden="true"><use href="#icon-book"></use></svg><span data-i18n="allCourses">All courses</span>
+            </a>
+            <a class="@desktopNavClass("Resources")" asp-area="" asp-controller="Resources" asp-action="Index" aria-current="@(controllerIs("Resources") ? "page" : null)">
+                <svg aria-hidden="true"><use href="#icon-search"></use></svg><span data-i18n="exploreResources">Explore resources</span>
+            </a>
+            <a class="@desktopNavClass("Contributions")" asp-area="" asp-controller="Contributions" asp-action="Create" aria-current="@(controllerIs("Contributions") ? "page" : null)">
+                <svg aria-hidden="true"><use href="#icon-upload"></use></svg><span data-i18n="contribute">Contribute</span>
+            </a>
+            <a class="@desktopNavClass("Community")" asp-area="" asp-controller="Community" asp-action="Index" aria-current="@(controllerIs("Community") ? "page" : null)">
+                <svg aria-hidden="true"><use href="#icon-users"></use></svg><span data-i18n="community">Community</span>
+            </a>
+        </nav>
+
+        <div class="side-divider"></div>
+        <div class="side-label-row">
+            <span class="side-label" data-i18n="currentCourse">Current course</span>
+            <a class="side-action-link" asp-area="" asp-controller="Courses" asp-action="Index" data-i18n="switchCourse">Switch</a>
+        </div>
+        <a class="current-course-card" asp-area="" asp-controller="Courses" asp-action="@(shellCourse is null ? "Index" : "Details")" asp-route-id="@shellCourse?.Id">
+            <span class="current-course-top">
+                <span class="course-code-dark">@activeCourseCode</span>
+                <svg class="course-arrow" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+            </span>
+            <span class="current-course-name">@activeCourseName</span>
+            <span class="current-course-meta" data-i18n="openCourseWorkspace">Open course materials and roadmap</span>
+            <span class="mini-progress" aria-hidden="true"><span style="width: 35%"></span></span>
+        </a>
+
+        <div class="sidebar-spacer"></div>
+        <section class="tutor-side-card" aria-labelledby="tutor-card-title">
+            <span class="tutor-side-icon"><svg aria-hidden="true"><use href="#icon-sparkles"></use></svg></span>
+            <strong id="tutor-card-title" data-i18n="courseTutor">Course-aware AI tutor</strong>
+            <p data-i18n="tutorGrounded">Ask questions grounded in your selected course resources.</p>
+            <a class="tutor-side-button" asp-area="" asp-controller="Tutor" asp-action="Index" data-i18n="askTutor">Ask the tutor</a>
+        </section>
+    </aside>
+
+    <div class="app-frame">
+        <header class="topbar">
+            <a class="mobile-brand" asp-area="" asp-controller="Home" asp-action="Index" aria-label="Go to MASDAR home">
+                <span class="brand-mark"><svg aria-hidden="true"><use href="#icon-library"></use></svg></span>
+                <strong>MASDAR</strong>
+            </a>
+
+            <form class="top-search" asp-area="" asp-controller="Resources" asp-action="Index" method="get" role="search">
+                <svg aria-hidden="true"><use href="#icon-search"></use></svg>
+                <label class="visually-hidden" for="global-search">Search the platform</label>
+                <input id="global-search" name="search" type="search" value="@Context.Request.Query["search"]" placeholder="Search a topic, course, or resource" data-i18n-placeholder="globalSearch" autocomplete="off" />
+            </form>
+
+            <div class="topbar-actions">
+                <a class="course-context-pill" asp-area="" asp-controller="Courses" asp-action="@(shellCourse is null ? "Index" : "Details")" asp-route-id="@shellCourse?.Id" aria-label="Open current course">
+                    <span class="context-dot" aria-hidden="true"></span>
+                    <span class="context-copy"><strong>@activeCourseCode</strong><span>@activeCourseName</span></span>
+                    <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+                </a>
+                <button class="top-icon language-toggle" type="button" data-language-toggle aria-label="Switch to Arabic" title="Switch language">
+                    <span class="language-toggle-label" aria-hidden="true">ع</span>
+                </button>
+                <button class="top-icon theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" aria-pressed="false" title="Switch color theme">
+                    <svg class="theme-icon theme-icon-moon" aria-hidden="true"><use href="#icon-moon"></use></svg>
+                    <svg class="theme-icon theme-icon-sun" aria-hidden="true"><use href="#icon-sun"></use></svg>
+                </button>
+                <partial name="_LoginPartial" />
+            </div>
+        </header>
+
+        <main id="main-content" class="main page-enter" tabindex="-1">
+            @RenderBody()
+        </main>
+
+        <footer class="app-footer">
+            <span>&copy; @DateTime.UtcNow.Year MASDAR</span>
+            <span data-i18n="knowledgeHub">Your university knowledge hub</span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy" data-i18n="privacy">Privacy</a>
+        </footer>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Primary mobile navigation">
+        <a class="@mobileNavClass("Home")" asp-area="" asp-controller="Home" asp-action="Index" aria-current="@(controllerIs("Home") ? "page" : null)">
+            <svg aria-hidden="true"><use href="#icon-home"></use></svg><span data-i18n="home">Home</span>
+        </a>
+        <a class="@mobileNavClass("Courses")" asp-area="" asp-controller="Courses" asp-action="Index" aria-current="@(controllerIs("Courses") ? "page" : null)">
+            <svg aria-hidden="true"><use href="#icon-book"></use></svg><span data-i18n="courses">Courses</span>
+        </a>
+        <a class="@mobileNavClass("Resources")" asp-area="" asp-controller="Resources" asp-action="Index" aria-current="@(controllerIs("Resources") ? "page" : null)">
+            <svg aria-hidden="true"><use href="#icon-search"></use></svg><span data-i18n="explore">Explore</span>
+        </a>
+        <a class="@mobileNavClass("Contributions")" asp-area="" asp-controller="Contributions" asp-action="Create" aria-current="@(controllerIs("Contributions") ? "page" : null)">
+            <svg aria-hidden="true"><use href="#icon-upload"></use></svg><span data-i18n="upload">Upload</span>
+        </a>
+        <a class="@mobileNavClass("Community")" asp-area="" asp-controller="Community" asp-action="Index" aria-current="@(controllerIs("Community") ? "page" : null)">
+            <svg aria-hidden="true"><use href="#icon-users"></use></svg><span data-i18n="community">Community</span>
+        </a>
+    </nav>
+
+    <div class="toast-stack" aria-live="polite" aria-atomic="false">
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="masdar-toast toast-success" role="status" data-auto-dismiss="5200">
+                <svg aria-hidden="true"><use href="#icon-check"></use></svg>
+                <span>@successMessage</span>
+                <button type="button" data-toast-close aria-label="Dismiss message"><svg aria-hidden="true"><use href="#icon-x"></use></svg></button>
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="masdar-toast toast-error" role="alert">
+                <svg aria-hidden="true"><use href="#icon-alert"></use></svg>
+                <span>@errorMessage</span>
+                <button type="button" data-toast-close aria-label="Dismiss message"><svg aria-hidden="true"><use href="#icon-x"></use></svg></button>
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(warningMessage))
+        {
+            <div class="masdar-toast toast-warning" role="status" data-auto-dismiss="7000">
+                <svg aria-hidden="true"><use href="#icon-alert"></use></svg>
+                <span>@warningMessage</span>
+                <button type="button" data-toast-close aria-label="Dismiss message"><svg aria-hidden="true"><use href="#icon-x"></use></svg></button>
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(infoMessage))
+        {
+            <div class="masdar-toast toast-info" role="status" data-auto-dismiss="6000">
+                <svg aria-hidden="true"><use href="#icon-info"></use></svg>
+                <span>@infoMessage</span>
+                <button type="button" data-toast-close aria-label="Dismiss message"><svg aria-hidden="true"><use href="#icon-x"></use></svg></button>
+            </div>
+        }
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/i18n.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

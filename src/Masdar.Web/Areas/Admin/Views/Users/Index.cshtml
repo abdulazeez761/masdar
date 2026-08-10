@@ -1,0 +1,22 @@
+@model IReadOnlyList<AdminUserRowViewModel>
+@{ ViewData["Title"] = "Manage users"; }
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">Identity and access</span><h1>Users</h1><p>Search accounts, inspect activity, and manage access.</p></div></header>
+<form method="get" class="card filter-bar"><input type="search" name="query" value="@ViewBag.Query" placeholder="Search by name or email" aria-label="Search users" /><button class="btn btn-primary" type="submit">Search</button></form>
+<div class="card table-shell">
+<table class="data-table">
+    <thead><tr><th>User</th><th>Academic context</th><th>Role</th><th>Reputation</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var row in Model)
+    {
+        <tr>
+            <td><strong>@row.User.DisplayName</strong><small>@row.User.Email</small></td>
+            <td>@(row.User.Major?.Name ?? "Not set")<small>@row.User.University?.Name</small></td>
+            <td>@string.Join(", ", row.Roles)</td><td>@row.User.ReputationBalance</td>
+            <td><span class="badge @(row.User.IsActive ? "badge-green" : "badge-gray")">@(row.User.IsActive ? "Active" : "Inactive")</span></td>
+            <td><a class="btn btn-secondary btn-small" asp-action="Details" asp-route-id="@row.User.Id">View</a></td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

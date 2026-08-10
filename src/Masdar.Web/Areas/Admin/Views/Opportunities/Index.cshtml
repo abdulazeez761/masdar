@@ -1,0 +1,8 @@
+@model IReadOnlyList<Opportunity>
+@{ ViewData["Title"] = "Opportunities"; }
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">Beyond the classroom</span><h1>Opportunities</h1><p>Publish internships, workshops, competitions, and student events.</p></div><a class="btn btn-primary" asp-action="Create">Add opportunity</a></header>
+<form method="get" class="card filter-bar"><input type="search" name="query" value="@ViewBag.Query" placeholder="Search opportunities" /><button class="btn btn-primary" type="submit">Search</button></form>
+<div class="card table-shell"><table class="data-table"><thead><tr><th>Opportunity</th><th>Starts</th><th>Registrations</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var item in Model) { <tr><td><strong>@item.Title</strong><small>@item.Type · @item.Location</small></td><td>@item.StartsAtUtc.ToLocalTime().ToString("g")</td><td>@item.Registrations.Count</td><td><span class="badge @(item.IsPublished ? "badge-green" : "badge-gray")">@(item.IsPublished ? "Published" : "Unpublished")</span></td><td><div class="table-actions"><a class="btn btn-secondary btn-small" asp-action="Edit" asp-route-id="@item.Id">Edit</a><form asp-action="TogglePublished" asp-route-id="@item.Id" method="post"><button class="btn btn-soft btn-small" type="submit">@(item.IsPublished ? "Unpublish" : "Publish")</button></form></div></td></tr> }
+</tbody></table></div>

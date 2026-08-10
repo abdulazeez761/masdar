@@ -1,0 +1,124 @@
+@model Masdar.Web.ViewModels.HomeDashboardViewModel
+@{
+    ViewData["Title"] = "University knowledge, built together";
+}
+
+<header class="page-head home-hero">
+    <div>
+        <div class="eyebrow">Your university knowledge hub</div>
+        <h1>@(Model.IsAuthenticated ? $"Welcome back, {Model.DisplayName}" : "Study smarter with resources students trust")</h1>
+        <p>Find course-specific materials, follow a focused roadmap, and learn from your university community.</p>
+    </div>
+    <a class="btn btn-primary" asp-controller="Resources" asp-action="Index">Explore resources</a>
+</header>
+
+<section class="card p-4 mb-4" aria-labelledby="home-search-heading">
+    <h2 id="home-search-heading" class="h5">What are you studying?</h2>
+    <form asp-controller="Resources" asp-action="Index" method="get" class="d-flex flex-column flex-md-row gap-2">
+        <label class="visually-hidden" for="dashboard-search">Search resources</label>
+        <input class="form-control" id="dashboard-search" name="search" type="search" placeholder="Try “integration practice exam”" />
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+</section>
+
+@if (!Model.IsAuthenticated)
+{
+    <section class="card p-4 text-center empty-state">
+        <h2>Make Masdar yours</h2>
+        <p>Sign in to save resources, track roadmap progress, RSVP to opportunities, and build community reputation.</p>
+        <div class="d-flex justify-content-center gap-2 flex-wrap">
+            <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Create an account</a>
+            <a class="btn btn-secondary" asp-area="Identity" asp-page="/Account/Login">Sign in</a>
+            <a class="btn btn-soft" asp-controller="Courses" asp-action="Index">Browse courses</a>
+        </div>
+    </section>
+}
+else if (Model.ActiveCourse is null)
+{
+    <section class="empty-state card p-5">
+        <h2>Choose your active course</h2>
+        <p>Your dashboard will bring its best materials, roadmap, and opportunities together here.</p>
+        <a class="btn btn-primary" asp-controller="Courses" asp-action="Index">Open course catalog</a>
+    </section>
+}
+else
+{
+    <section class="section-head">
+        <div>
+            <div class="eyebrow">Active course</div>
+            <h2>@Model.ActiveCourse.Code · @Model.ActiveCourse.Name</h2>
+            <p>@Model.ActiveCourse.Instructor · @Model.ActiveCourse.Semester</p>
+        </div>
+        <a class="btn btn-secondary" asp-controller="Courses" asp-action="Details" asp-route-id="@Model.ActiveCourse.Id">Open workspace</a>
+    </section>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-4"><article class="card p-3 h-100"><span class="text-muted">Roadmap complete</span><strong class="fs-3">@Model.CompletedRoadmapNodes</strong></article></div>
+        <div class="col-sm-4"><article class="card p-3 h-100"><span class="text-muted">Saved resources</span><strong class="fs-3">@Model.SavedResources</strong></article></div>
+        <div class="col-sm-4"><article class="card p-3 h-100"><span class="text-muted">Reputation</span><strong class="fs-3">@Model.ReputationPoints pts</strong></article></div>
+    </div>
+
+    <section class="mb-5" aria-labelledby="recommended-heading">
+        <div class="section-head">
+            <div><h2 id="recommended-heading">Recommended resources</h2><p>Highly rated material for your current course.</p></div>
+            <a asp-controller="Resources" asp-action="Index" asp-route-courseId="@Model.ActiveCourse.Id">View all</a>
+        </div>
+        @if (Model.RecommendedResources.Count == 0)
+        {
+            <div class="empty-state card p-4"><h3>No published resources yet</h3><p>Be the first student to help this course.</p><a class="btn btn-primary" asp-controller="Contributions" asp-action="Create" asp-route-courseId="@Model.ActiveCourse.Id">Contribute a resource</a></div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var resource in Model.RecommendedResources)
+                {
+                    <div class="col-lg-4"><partial name="~/Views/Resources/_ResourceCard.cshtml" model="resource" /></div>
+                }
+            </div>
+        }
+    </section>
+
+    <div class="row g-4">
+        <section class="col-lg-7" aria-labelledby="roadmap-heading">
+            <div class="section-head"><div><h2 id="roadmap-heading">Your roadmap</h2><p>Progress through the course in the right order.</p></div><a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.ActiveCourse.Id" asp-route-tab="roadmap">Full roadmap</a></div>
+            <div class="card p-3">
+                @if (Model.Roadmap.Count == 0)
+                {
+                    <div class="empty-state"><p>A roadmap has not been added for this course yet.</p></div>
+                }
+                @foreach (var node in Model.Roadmap.Take(4))
+                {
+                    <div class="d-flex gap-3 align-items-start py-3 border-bottom">
+                        <span class="badge @(node.IsCompleted ? "badge-green" : "badge-gray")">@(node.IsCompleted ? "Done" : node.SortOrder.ToString())</span>
+                        <div class="flex-grow-1"><strong>@node.Title</strong><div class="text-muted small">@node.Description</div></div>
+                        <span class="badge badge-blue">@node.WeightPercent%</span>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="col-lg-5" aria-labelledby="opportunities-heading">
+            <div class="section-head"><div><h2 id="opportunities-heading">Relevant opportunities</h2><p>Move from theory to practice.</p></div></div>
+            <div class="d-grid gap-3">
+                @if (Model.Opportunities.Count == 0)
+                {
+                    <div class="empty-state card p-4"><p>No upcoming opportunities right now.</p></div>
+                }
+                @foreach (var opportunity in Model.Opportunities.Take(3))
+                {
+                    <article class="card p-3">
+                        <span class="badge badge-blue">@opportunity.Type</span>
+                        <h3 class="h6 mt-2">@opportunity.Title</h3>
+                        <p class="small text-muted mb-2">@opportunity.StartsAtUtc.ToLocalTime().ToString("ddd, MMM d") · @opportunity.Location</p>
+                        <form asp-controller="Courses" asp-action="ToggleOpportunity" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@opportunity.Id" />
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                            <button class="btn btn-small @(opportunity.IsRegistered ? "btn-soft" : "btn-secondary")" type="submit">@(opportunity.IsRegistered ? "RSVP’d · Cancel" : "RSVP")</button>
+                        </form>
+                    </article>
+                }
+            </div>
+        </section>
+    </div>
+}

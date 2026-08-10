@@ -1,0 +1,202 @@
+/* Global readability, bilingual direction, and shell refinements. */
+html { font-size: 16px; }
+
+body {
+  font-size: 1rem;
+  line-height: 1.58;
+}
+
+p,
+li,
+dd,
+td { line-height: 1.58; }
+
+small,
+.small { font-size: .79rem !important; }
+
+.side-link { min-height: 47px; font-size: .91rem; }
+.side-label { font-size: .72rem; }
+.current-course-name { font-size: .85rem; line-height: 1.35; }
+.current-course-meta { font-size: .72rem; line-height: 1.35; }
+.tutor-side-card strong { font-size: .9rem; }
+.tutor-side-card p { font-size: .77rem; line-height: 1.48; }
+
+.topbar {
+  min-height: var(--topbar);
+  height: auto;
+  padding-block: .55rem;
+}
+
+.top-search { min-width: 220px; }
+.top-search input { font-size: .9rem; }
+.topbar-actions { min-width: 0; flex-shrink: 0; }
+.course-context-pill { width: min(270px, 24vw); min-width: 165px; }
+.context-copy strong { font-size: .79rem; }
+.context-copy span { font-size: .69rem; }
+.user-menu-trigger { max-width: 220px; }
+.user-copy { min-width: 0; }
+.user-copy strong { font-size: .79rem; }
+.user-copy span { font-size: .69rem; }
+
+.language-toggle-label {
+  display: block;
+  color: currentColor;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.page-head p,
+.hero-desc { font-size: 1rem; line-height: 1.65; }
+.section-head p { font-size: .88rem; }
+.card p { line-height: 1.58; }
+
+.btn {
+  --bs-btn-font-size: .9rem;
+  min-height: 42px;
+  font-weight: 750;
+}
+
+.btn-small { min-height: 36px; font-size: .8rem; }
+
+.field label,
+label.form-label { font-size: .84rem; }
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  min-height: 48px;
+  font-size: .95rem;
+}
+
+textarea { min-height: 120px; }
+.data-table th { font-size: .75rem; }
+.data-table td { font-size: .9rem; }
+.badge { font-size: .72rem; }
+.mobile-link { font-size: .67rem; }
+
+/* Arabic and RTL layout. Dynamic domain data remains in its source language. */
+html[dir="rtl"] body {
+  direction: rtl;
+  font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+  text-align: right;
+}
+
+html[dir="rtl"] .sidebar {
+  inset: 0 0 0 auto;
+}
+
+html[dir="rtl"] .app-frame {
+  margin-right: var(--sidebar);
+  margin-left: 0;
+}
+
+html[dir="rtl"] .brand,
+html[dir="rtl"] .data-table th,
+html[dir="rtl"] .data-table td,
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select {
+  text-align: right;
+}
+
+html[dir="rtl"] .course-arrow,
+html[dir="rtl"] .course-context-pill > svg,
+html[dir="rtl"] .user-chevron,
+html[dir="rtl"] .section-link svg,
+html[dir="rtl"] .btn svg[data-directional] {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .top-search > svg {
+  right: 15px;
+  left: auto;
+}
+
+html[dir="rtl"] .top-search input {
+  padding-right: 43px;
+  padding-left: 14px;
+}
+
+html[dir="rtl"] .dropdown-menu-end {
+  --bs-position: start;
+  left: 0 !important;
+  right: auto !important;
+}
+
+html[dir="rtl"] .form-actions,
+html[dir="rtl"] .table-actions { direction: rtl; }
+
+html[dir="rtl"] .pagination { padding-right: 0; }
+html[dir="rtl"] .form-check { padding-right: 1.5em; padding-left: 0; }
+html[dir="rtl"] .form-check .form-check-input { float: right; margin-right: -1.5em; margin-left: 0; }
+
+/* The prototype was authored at a very dense desktop scale. Keep metadata and
+   interactive copy readable without flattening the established heading scale. */
+.prototype-study-page :where(a, button, input, select, textarea, label, small, p, span, time, li, td, th),
+body[data-area="Admin"] :where(a, button, input, select, textarea, label, small, p, span, time, li, td, th) {
+  font-size: max(.82rem, 1em) !important;
+}
+
+.prototype-course-actions form .course-tutor-button {
+  border-color: transparent !important;
+  background: var(--blue-600) !important;
+}
+
+.course-ai-activate,
+.resource-tutor-form,
+.resource-context-tutor-form { margin: 0; }
+
+.course-ai-activate button {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.25rem;
+  border: 0;
+  border-radius: .7rem;
+  color: var(--blue-700);
+  background: #fff;
+  font-weight: 850;
+}
+
+.resource-tutor-form .resource-tutor-cta {
+  width: 100%;
+  border: 0;
+  text-align: start;
+}
+
+.resource-context-tutor-form button {
+  border: 0;
+  padding: 0;
+  color: var(--blue-600);
+  background: transparent;
+  font-weight: 850;
+}
+
+@media (max-width: 1180px) {
+  .user-copy { display: none; }
+  .user-menu-trigger { padding-inline: 4px; }
+  .course-context-pill { width: 210px; }
+}
+
+@media (max-width: 960px) {
+  html[dir="rtl"] .app-frame { margin-right: 0; }
+  .topbar { min-height: 66px; }
+  .course-context-pill { width: min(190px, 36vw); }
+  .context-copy strong { font-size: .75rem; }
+  .context-copy span { font-size: .65rem; }
+}
+
+@media (max-width: 560px) {
+  html { font-size: 16px; }
+  .topbar-actions { gap: 5px; }
+  .language-toggle,
+  .theme-toggle { width: 38px; height: 38px; }
+  .course-context-pill { min-width: 0; width: min(152px, 42vw); }
+  .context-copy span { display: none; }
+  .page-head p,
+  .hero-desc { font-size: .94rem; }
+}

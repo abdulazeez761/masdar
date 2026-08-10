@@ -1,0 +1,83 @@
+@model Masdar.Web.ViewModels.CommunityIndexViewModel
+@{
+    ViewData["Title"] = "Community";
+}
+
+<header class="page-head">
+    <div><div class="eyebrow">Students help students</div><h1>Community</h1><p>Request missing material, vote for what matters, and recognize trusted contributors.</p></div>
+    <a class="btn btn-primary" asp-action="Create">New request</a>
+</header>
+
+<nav class="nav nav-pills course-tabs mb-4" aria-label="Community sections">
+    <a class="nav-link @(Model.Tab == "requests" ? "active" : "")" asp-action="Index" asp-route-tab="requests">Resource requests</a>
+    <a class="nav-link @(Model.Tab == "contributors" ? "active" : "")" asp-action="Index" asp-route-tab="contributors">Top contributors</a>
+</nav>
+
+@if (Model.Tab == "contributors")
+{
+    <section class="card leaderboard-card overflow-hidden" aria-labelledby="leaderboard-heading">
+        <div class="p-4 border-bottom"><h2 id="leaderboard-heading" class="h5 mb-1">Community leaderboard</h2><p class="text-muted mb-0">Points reward useful contributions, request fulfillment, and quality participation.</p></div>
+        @if (Model.Leaders.Count == 0) { <div class="empty-state p-5"><h3>No rankings yet</h3><p>Contribute the first published resource and take the lead.</p></div> }
+        else
+        {
+            <ol class="list-group list-group-flush list-group-numbered">
+                @foreach (var person in Model.Leaders)
+                {
+                    <li class="list-group-item d-flex align-items-center gap-3 p-3 @(person.IsCurrentUser ? "bg-light" : "")">
+                        <span class="leader-avatar rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width:2.5rem;height:2.5rem">@(string.Join("", person.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(x => x[0])))</span>
+                        <span class="flex-grow-1"><strong>@person.DisplayName @if (person.IsCurrentUser) { <span class="badge badge-blue">You</span> }</strong><small class="d-block text-muted">@(person.Department ?? "Masdar community") · @person.ResourceCount resources</small></span>
+                        <strong>@person.Points pts</strong>
+                    </li>
+                }
+            </ol>
+        }
+    </section>
+}
+else
+{
+    <form method="get" asp-action="Index" class="card p-3 mb-4" aria-label="Request filters">
+        <input type="hidden" name="tab" value="requests" />
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-5 field"><label for="request-search">Search requests</label><input id="request-search" class="form-control" type="search" name="search" value="@Model.Search" placeholder="Exam, assignment, topic…" /></div>
+            <div class="col-md-4 col-lg-3 field"><label for="request-course">Course</label><select id="request-course" class="form-select" name="courseId" asp-items="Model.Courses"><option value="">All courses</option></select></div>
+            <div class="col-md-4 col-lg-2 field"><label for="request-type">Type</label><select id="request-type" class="form-select" name="type" asp-items="Model.Types"><option value="">All types</option></select></div>
+            <div class="col-md-4 col-lg-2 d-flex gap-2"><button class="btn btn-primary" type="submit">Filter</button><a class="btn btn-secondary" asp-action="Index">Clear</a></div>
+        </div>
+    </form>
+
+    @if (Model.Requests.Count == 0)
+    {
+        <section class="empty-state card p-5"><h2>All caught up</h2><p>No open requests match these filters. Ask the community for the resource you need.</p><a class="btn btn-primary" asp-action="Create">Create a request</a></section>
+    }
+    else
+    {
+        <div class="request-list d-grid gap-3">
+            @foreach (var request in Model.Requests)
+            {
+                <article class="card request-card p-4 d-flex flex-column flex-md-row gap-3 align-items-md-center">
+                    <div class="flex-grow-1">
+                        <div class="d-flex gap-2 flex-wrap"><span class="badge badge-blue">@request.CourseCode</span><span class="badge badge-gray">@request.Type</span><span class="badge badge-amber">@request.BountyPoints pts</span></div>
+                        <h2 class="h5 mt-2 mb-1">@request.Title</h2>
+                        @if (!string.IsNullOrWhiteSpace(request.Notes)) { <p class="mb-1">@request.Notes</p> }
+                        <p class="small text-muted mb-0">Requested by @request.RequesterName · @request.CreatedAtUtc.ToLocalTime().ToString("MMM d, yyyy")</p>
+                    </div>
+                    <div class="request-actions d-flex align-items-center gap-2">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form asp-action="ToggleVote" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@request.Id" /><button class="btn @(request.HasVoted ? "btn-soft" : "btn-secondary")" type="submit" aria-pressed="@request.HasVoted">▲ @request.VoteCount</button></form>
+                            <a class="btn btn-primary" asp-controller="Contributions" asp-action="Create" asp-route-requestId="@request.Id">Fulfill</a>
+                        }
+                        else
+                        {
+                            <span class="badge badge-gray">@request.VoteCount votes</span><a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Sign in to help</a>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-4" aria-label="Request result pages"><ul class="pagination justify-content-center"><li class="page-item @(Model.Page <= 1 ? "disabled" : "")"><a class="page-link" asp-route-page="@(Model.Page - 1)" asp-route-search="@Model.Search" asp-route-courseId="@Model.CourseId" asp-route-type="@Model.Type">Previous</a></li><li class="page-item disabled"><span class="page-link">Page @Model.Page of @Model.TotalPages</span></li><li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")"><a class="page-link" asp-route-page="@(Model.Page + 1)" asp-route-search="@Model.Search" asp-route-courseId="@Model.CourseId" asp-route-type="@Model.Type">Next</a></li></ul></nav>
+        }
+    }
+}

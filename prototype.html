@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MASDAR | Your University Knowledge Hub</title>
+  <meta name="description" content="A community-curated university learning platform with trusted resources, guided course roadmaps, and a course-aware AI tutor.">
+  <script>
+    try {
+      const savedTheme = localStorage.getItem('masdar-theme');
+      const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = savedTheme || preferredTheme;
+    } catch (_) { document.documentElement.dataset.theme = 'light'; }
+  </script>
+  <script src="./lucide.min.js"></script>
+  <style>
+    :root {
+      --navy-950: #081126;
+      --navy-900: #0d1b38;
+      --navy-800: #14264a;
+      --blue-700: #1754d1;
+      --blue-600: #246bfd;
+      --blue-500: #4285ff;
+      --blue-100: #e8f0ff;
+      --blue-50: #f3f7ff;
+      --cyan-600: #0891b2;
+      --cyan-100: #cff7fc;
+      --amber-600: #d97706;
+      --amber-100: #fef3c7;
+      --green-700: #047857;
+      --green-100: #d1fae5;
+      --red-600: #dc2626;
+      --red-100: #fee2e2;
+      --ink-900: #111b31;
+      --ink-700: #3a4862;
+      --ink-500: #6d7890;
+      --ink-400: #929caf;
+      --surface: #ffffff;
+      --surface-raised: #ffffff;
+      --surface-soft: #f8fafc;
+      --surface-tint: #f2f6fd;
+      --canvas: #f3f6fb;
+      --line: #e0e6f0;
+      --line-strong: #cfd8e6;
+      --input-bg: #ffffff;
+      --header-bg: rgba(255,255,255,.88);
+      --tag-bg: #eef2f7;
+      --neutral-soft: #edf1f6;
+      --shadow-sm: 0 2px 8px rgba(12, 27, 56, 0.06);
+      --shadow-md: 0 14px 34px rgba(12, 27, 56, 0.11);
+      --shadow-lg: 0 24px 60px rgba(8, 17, 38, 0.18);
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --sidebar: 256px;
+      --topbar: 76px;
+      --ease: 180ms ease;
+      font-family: "Segoe UI Variable Text", "Segoe UI", "Noto Sans", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --navy-950: #050a15;
+      --navy-900: #0a1222;
+      --navy-800: #111e35;
+      --blue-700: #6d9bff;
+      --blue-600: #4f82ff;
+      --blue-500: #76a0ff;
+      --blue-100: #18356d;
+      --blue-50: #101d34;
+      --cyan-100: #103b45;
+      --cyan-600: #55c8df;
+      --amber-100: #412d0c;
+      --amber-600: #f2b84b;
+      --green-100: #0d3b31;
+      --green-700: #58d7b1;
+      --red-100: #451b21;
+      --red-600: #ff7886;
+      --ink-900: #f1f5fb;
+      --ink-700: #c7d1e1;
+      --ink-500: #93a1b7;
+      --ink-400: #718097;
+      --surface: #111a2a;
+      --surface-raised: #162134;
+      --surface-soft: #0d1625;
+      --surface-tint: #101c30;
+      --canvas: #08101d;
+      --line: #243249;
+      --line-strong: #34435b;
+      --input-bg: #0d1727;
+      --header-bg: rgba(8,16,29,.86);
+      --tag-bg: #1b273a;
+      --neutral-soft: #1b2738;
+      --shadow-sm: 0 3px 12px rgba(0,0,0,.18);
+      --shadow-md: 0 18px 42px rgba(0,0,0,.28);
+      --shadow-lg: 0 28px 70px rgba(0,0,0,.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { min-height: 100vh; background: var(--canvas); color: var(--ink-900); overflow-x: hidden; font-size: 14px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; transition: background-color .2s ease, color .2s ease; }
+    body.panel-open { overflow: hidden; }
+    button, input, select, textarea { font: inherit; }
+    button { border: 0; background: none; color: inherit; cursor: pointer; }
+    input, select, textarea { color: var(--ink-900); }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid rgba(36, 107, 253, 0.26);
+      outline-offset: 2px;
+    }
+    h1, h2, h3, h4 { font-family: "Segoe UI Variable Display", "Segoe UI", "Noto Sans", sans-serif; letter-spacing: -0.022em; text-wrap: balance; }
+    strong, h1, h2, h3, h4 { font-weight: 720; }
+    time, .quality-number, .leader-points, .exam-days, .progress-value { font-variant-numeric: tabular-nums; }
+    p { line-height: 1.55; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .muted { color: var(--ink-500); }
+    .nowrap { white-space: nowrap; }
+
+    /* Shell */
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      display: flex;
+      flex-direction: column;
+      padding: 22px 16px 18px;
+      background: var(--navy-950);
+      color: #fff;
+      z-index: 60;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 26px; text-align: left; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; background: var(--blue-600); box-shadow: 0 8px 18px rgba(36,107,253,.28); }
+    .brand-mark svg { width: 20px; height: 20px; }
+    .brand-copy { display: flex; align-items: baseline; gap: 6px; }
+    .brand-name { font-size: 18px; font-weight: 800; letter-spacing: .02em; }
+    .brand-ar { color: #8da9e9; font-size: 13px; }
+    .side-label { padding: 0 12px 8px; color: #7383a5; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .side-nav { display: flex; flex-direction: column; gap: 5px; }
+    .side-link { width: 100%; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border-radius: 12px; color: #aebbd5; font-size: 13px; font-weight: 650; text-align: left; transition: var(--ease); }
+    .side-link svg { width: 18px; height: 18px; flex: 0 0 auto; }
+    .side-link:hover { color: #fff; background: rgba(255,255,255,.07); }
+    .side-link.active { color: #fff; background: var(--blue-600); box-shadow: 0 8px 18px rgba(36,107,253,.22); }
+    .side-divider { height: 1px; margin: 20px 8px; background: rgba(255,255,255,.09); }
+    .side-label-row { display: flex; align-items: center; justify-content: space-between; padding: 0 12px 8px; }
+    .side-label-row .side-label { padding: 0; }
+    .side-action-link { display: inline-flex; align-items: center; gap: 4px; color: #8da3c9; font-size: 11px; font-weight: 750; background: none; border: 0; cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: var(--ease); }
+    .side-action-link:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .side-action-link svg { width: 12px; height: 12px; }
+    .current-course-card { display: block; width: 100%; margin: 0; padding: 14px; border: 1px solid rgba(255,255,255,.11); border-radius: 16px; background: rgba(255,255,255,.055); text-align: left; transition: var(--ease); box-sizing: border-box; }
+    .current-course-card:hover { background: rgba(255,255,255,.085); transform: translateY(-1px); }
+    .current-course-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 7px; }
+    .course-code-dark { color: #8fb1ff; font-size: 10px; font-weight: 800; letter-spacing: .04em; }
+    .course-arrow { color: #7f8ca7; flex-shrink: 0; }
+    .current-course-name { display: block; color: #fff; font-size: 13px; font-weight: 750; margin-bottom: 4px; }
+    .current-course-meta { display: block; color: #8d9ab6; font-size: 10px; }
+    .mini-progress { display: block; width: 100%; height: 5px; margin-top: 12px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.12); position: relative; box-sizing: border-box; }
+    .mini-progress span { display: block; height: 100%; border-radius: 999px; background: var(--blue-500); transition: width 0.3s ease; }
+    .sidebar-spacer { flex: 1; min-height: 12px; }
+    .tutor-side-card { padding: 14px; border-radius: 16px; background: linear-gradient(145deg, #173673, #112957); }
+    .tutor-side-icon { width: 34px; height: 34px; display: grid; place-items: center; margin-bottom: 10px; border-radius: 11px; background: rgba(255,255,255,.12); }
+    .tutor-side-icon svg { width: 18px; height: 18px; }
+    .tutor-side-card strong { display: block; font-size: 13px; margin-bottom: 4px; }
+    .tutor-side-card p { color: #a9bce3; font-size: 10px; }
+    .tutor-side-button { width: 100%; margin-top: 12px; padding: 9px 10px; border-radius: 10px; background: #fff; color: var(--blue-700); font-size: 11px; font-weight: 800; }
+
+    .app-frame { min-height: 100vh; margin-left: var(--sidebar); }
+    .topbar { position: sticky; top: 0; z-index: 50; height: var(--topbar); display: flex; align-items: center; gap: 18px; padding: 0 30px; border-bottom: 1px solid rgba(227,232,241,.9); background: rgba(255,255,255,.93); backdrop-filter: blur(16px); }
+    .mobile-brand { display: none; }
+    .top-search { position: relative; flex: 1; max-width: 520px; }
+    .top-search svg { position: absolute; left: 14px; top: 50%; width: 17px; height: 17px; color: var(--ink-400); transform: translateY(-50%); pointer-events: none; }
+    .top-search input { width: 100%; height: 42px; padding: 0 14px 0 42px; border: 1px solid var(--line); border-radius: 13px; background: var(--canvas); font-size: 13px; outline: 0; transition: var(--ease); }
+    .top-search input:focus { border-color: #9dbbff; background: #fff; box-shadow: 0 0 0 4px rgba(36,107,253,.08); }
+    .topbar-actions { display: flex; align-items: center; gap: 9px; margin-left: auto; }
+    .course-context-pill { height: 40px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; text-align: left; }
+    .context-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue-600); box-shadow: 0 0 0 4px var(--blue-100); }
+    .context-copy { line-height: 1.05; }
+    .context-copy strong { display: block; font-size: 11px; }
+    .context-copy span { color: var(--ink-500); font-size: 9px; }
+    .top-icon { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink-700); }
+    .top-icon:hover { border-color: #b8c8e9; color: var(--blue-600); }
+    .top-icon svg { width: 18px; height: 18px; }
+    .user-menu { display: flex; align-items: center; gap: 9px; padding-left: 5px; }
+    .avatar { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: var(--navy-900); color: #fff; font-size: 11px; font-weight: 800; }
+    .user-copy strong { display: block; font-size: 11px; }
+    .user-copy span { color: var(--ink-500); font-size: 9px; }
+    .main { max-width: 1240px; margin: 0 auto; padding: 34px 34px 72px; }
+    .page-enter { animation: pageEnter 260ms ease both; }
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Shared components */
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+    .eyebrow { margin-bottom: 7px; color: var(--blue-600); font-size: 10px; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
+    .page-head h1 { font-size: clamp(25px, 3vw, 34px); line-height: 1.12; }
+    .page-head p { max-width: 620px; margin-top: 8px; color: var(--ink-500); font-size: 13px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 30px 0 14px; }
+    .section-head h2 { font-size: 18px; }
+    .section-head p { margin-top: 3px; color: var(--ink-500); font-size: 11px; }
+    .section-link { display: flex; align-items: center; gap: 5px; color: var(--blue-600); font-size: 11px; font-weight: 750; }
+    .section-link svg { width: 14px; height: 14px; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-sm); }
+    .btn { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; border-radius: 11px; font-size: 12px; font-weight: 760; transition: var(--ease); }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--blue-600); color: #fff; box-shadow: 0 8px 18px rgba(36,107,253,.2); }
+    .btn-primary:hover { background: var(--blue-700); transform: translateY(-1px); }
+    .btn-secondary { border: 1px solid var(--line-strong); background: #fff; color: var(--ink-700); }
+    .btn-secondary:hover { border-color: #9fb4dd; color: var(--blue-700); }
+    .btn-soft { background: var(--blue-100); color: var(--blue-700); }
+    .btn-soft:hover { background: #dce8ff; }
+    .btn-danger-soft { background: var(--red-100); color: var(--red-600); }
+    .btn-small { min-height: 34px; padding: 0 12px; font-size: 10px; }
+    .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+    .icon-button { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 11px; background: #fff; color: var(--ink-500); }
+    .icon-button:hover { color: var(--blue-600); border-color: #aebfe0; }
+    .icon-button svg { width: 16px; height: 16px; }
+    .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+    .field label { color: var(--ink-700); font-size: 10px; font-weight: 750; }
+    .field input, .field select, .field textarea { width: 100%; min-width: 0; border: 1px solid var(--line-strong); border-radius: 11px; background: #fff; outline: 0; transition: var(--ease); }
+    .field input, .field select { height: 42px; padding: 0 12px; font-size: 12px; }
+    .field textarea { min-height: 96px; padding: 11px 12px; resize: vertical; font-size: 12px; line-height: 1.5; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #8baeff; box-shadow: 0 0 0 4px rgba(36,107,253,.08); }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; font-size: 9px; font-weight: 820; line-height: 1; }
+    .badge svg { width: 11px; height: 11px; }
+    .badge-blue { background: var(--blue-100); color: var(--blue-700); }
+    .badge-green { background: var(--green-100); color: var(--green-700); }
+    .badge-amber { background: var(--amber-100); color: var(--amber-600); }
+    .badge-gray { background: #eef1f6; color: #59657a; }
+    .empty-state { padding: 46px 24px; border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); background: rgba(255,255,255,.5); text-align: center; }
+    .empty-icon { width: 48px; height: 48px; display: grid; place-items: center; margin: 0 auto 12px; border-radius: 15px; background: var(--blue-100); color: var(--blue-600); }
+    .empty-icon svg { width: 22px; height: 22px; }
+    .empty-state h3 { font-size: 15px; }
+    .empty-state p { margin: 6px auto 16px; color: var(--ink-500); font-size: 11px; }
+
+    /* Home */
+    .home-hero { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0,1.35fr) minmax(260px,.65fr); gap: 34px; min-height: 288px; padding: 38px 40px; border-radius: var(--radius-xl); background: var(--navy-950); color: #fff; box-shadow: var(--shadow-md); }
+    .home-hero::before { content: ""; position: absolute; inset: 0; opacity: .22; background-image: linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px); background-size: 34px 34px; mask-image: linear-gradient(90deg,#000,transparent 72%); }
+    .home-hero::after { content: ""; position: absolute; width: 300px; height: 300px; right: -95px; top: -130px; border-radius: 50%; background: rgba(36,107,253,.42); filter: blur(10px); }
+    .hero-copy, .exam-card { position: relative; z-index: 1; }
+    .hero-kicker { display: flex; align-items: center; gap: 7px; margin-bottom: 13px; color: #9bb7ee; font-size: 10px; font-weight: 750; }
+    .hero-kicker span { width: 7px; height: 7px; border-radius: 50%; background: #54d7ee; box-shadow: 0 0 0 5px rgba(84,215,238,.12); }
+    .home-hero h1 { max-width: 650px; font-size: clamp(28px,4vw,43px); line-height: 1.06; }
+    .home-hero h1 em { color: #72a3ff; font-style: normal; }
+    .home-hero .hero-desc { max-width: 590px; margin-top: 13px; color: #aebbd1; font-size: 13px; }
+    .hero-search { display: flex; gap: 8px; max-width: 570px; margin-top: 24px; padding: 6px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.1); backdrop-filter: blur(10px); }
+    .hero-search input { min-width: 0; flex: 1; height: 42px; padding: 0 12px; border: 0; outline: 0; background: transparent; color: #fff; font-size: 12px; }
+    .hero-search input::placeholder { color: #8292af; }
+    .hero-search .btn { min-width: 102px; }
+    .exam-card { align-self: center; padding: 20px; border: 1px solid rgba(255,255,255,.13); border-radius: 20px; background: rgba(255,255,255,.085); backdrop-filter: blur(12px); }
+    .exam-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .exam-label { color: #93a6c8; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .exam-days { display: grid; place-items: center; min-width: 42px; height: 28px; border-radius: 9px; background: rgba(245,158,11,.16); color: #ffc25a; font-size: 10px; font-weight: 800; }
+    .exam-card h3 { font-size: 18px; }
+    .exam-card p { margin-top: 5px; color: #9cacbf; font-size: 10px; }
+    .exam-progress-label { display: flex; justify-content: space-between; margin: 18px 0 7px; color: #a8b5cb; font-size: 9px; }
+    .exam-progress { height: 7px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.1); }
+    .exam-progress span { display: block; height: 100%; border-radius: inherit; background: #5c90ff; }
+    .exam-card .btn { width: 100%; margin-top: 18px; background: #fff; color: var(--navy-900); box-shadow: none; }
+    .home-grid { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(300px,.85fr); gap: 20px; }
+    .continue-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; padding: 18px; }
+    .course-symbol { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 15px; background: var(--blue-100); color: var(--blue-600); }
+    .course-symbol svg { width: 22px; height: 22px; }
+    .continue-card h3 { font-size: 14px; }
+    .continue-card p { margin-top: 3px; color: var(--ink-500); font-size: 10px; }
+    .continue-meta { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+    .progress-inline { width: 120px; height: 6px; overflow: hidden; border-radius: 99px; background: #e9edf4; }
+    .progress-inline span { display: block; height: 100%; border-radius: inherit; background: var(--blue-600); }
+    .progress-value { color: var(--blue-700); font-size: 9px; font-weight: 800; }
+    .next-step-card { padding: 18px; background: var(--blue-50); border-color: #dce7fb; }
+    .next-step-card .row { display: flex; align-items: flex-start; gap: 12px; }
+    .next-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; background: #fff; color: var(--blue-600); box-shadow: var(--shadow-sm); }
+    .next-icon svg { width: 18px; height: 18px; }
+    .next-step-card small { color: var(--blue-700); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+    .next-step-card h3 { margin-top: 4px; font-size: 13px; }
+    .next-step-card p { margin-top: 3px; color: var(--ink-500); font-size: 10px; }
+    .resource-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .resource-card { display: flex; flex-direction: column; min-width: 0; padding: 17px; transition: var(--ease); }
+    .resource-card:hover { transform: translateY(-2px); border-color: #c4d3ef; box-shadow: var(--shadow-md); }
+    .resource-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .type-chip { display: inline-flex; align-items: center; gap: 6px; color: var(--blue-700); font-size: 9px; font-weight: 800; }
+    .type-chip-icon { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 8px; background: var(--blue-100); }
+    .type-chip-icon svg { width: 13px; height: 13px; }
+    .verified { display: inline-flex; align-items: center; gap: 4px; color: var(--green-700); font-size: 8px; font-weight: 800; }
+    .verified svg { width: 12px; height: 12px; }
+    .resource-card h3 { margin-top: 15px; font-size: 14px; line-height: 1.35; }
+    .resource-sub { margin-top: 5px; color: var(--ink-500); font-size: 9px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+    .mini-tag { padding: 4px 6px; border-radius: 6px; background: #f0f3f8; color: #667187; font-size: 8px; }
+    .resource-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 16px; }
+    .quality-score { display: flex; align-items: center; gap: 7px; }
+    .quality-score strong { font-size: 12px; }
+    .quality-score span { color: var(--ink-500); font-size: 8px; }
+    .quality-bar { width: 42px; height: 5px; overflow: hidden; border-radius: 99px; background: #e8ecf3; }
+    .quality-bar i { display: block; height: 100%; border-radius: inherit; background: #f7b731; }
+    .preview-link { display: flex; align-items: center; gap: 4px; color: var(--blue-600); font-size: 9px; font-weight: 800; }
+    .preview-link svg { width: 13px; height: 13px; }
+    .roadmap-card { padding: 19px; }
+    .roadmap-mini-row { position: relative; display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; }
+    .roadmap-mini-row:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 35px; width: 2px; height: 17px; background: #dfe5ef; }
+    .roadmap-mini-dot { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: #eef2f8; color: var(--ink-500); font-size: 9px; font-weight: 800; }
+    .roadmap-mini-dot.done { background: var(--green-100); color: var(--green-700); }
+    .roadmap-mini-row strong { display: block; font-size: 11px; }
+    .roadmap-mini-row span { color: var(--ink-500); font-size: 8px; }
+    .opportunity-list { display: flex; flex-direction: column; gap: 9px; }
+    .opportunity-row { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+    .opp-date-box { width: 38px; flex: 0 0 auto; padding: 6px 4px; border-radius: 10px; background: var(--amber-100); color: var(--amber-600); text-align: center; }
+    .opp-date-box strong { display: block; font-size: 13px; }
+    .opp-date-box span { font-size: 7px; font-weight: 800; text-transform: uppercase; }
+    .opportunity-row h4 { font-size: 10px; }
+    .opportunity-row p { margin-top: 2px; color: var(--ink-500); font-size: 8px; }
+
+    /* Explore */
+    .context-panel { padding: 18px; }
+    .context-title { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; font-size: 12px; font-weight: 800; }
+    .context-title span { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 9px; background: var(--blue-100); color: var(--blue-600); }
+    .context-title svg { width: 15px; height: 15px; }
+    .context-grid { display: grid; grid-template-columns: 1.2fr .9fr 1fr; gap: 12px; }
+    .category-strip { display: flex; gap: 8px; margin: 18px 0; padding-bottom: 3px; overflow-x: auto; scrollbar-width: none; }
+    .category-strip::-webkit-scrollbar { display: none; }
+    .mobile-category-field { display: none; }
+    .category-chip { flex: 0 0 auto; min-height: 36px; display: inline-flex; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink-700); font-size: 10px; font-weight: 700; }
+    .category-chip svg { width: 14px; height: 14px; }
+    .category-chip.active { border-color: var(--blue-600); background: var(--blue-600); color: #fff; box-shadow: 0 6px 14px rgba(36,107,253,.18); }
+    .results-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .result-search { position: relative; min-width: 220px; flex: 1; }
+    .result-search svg { position: absolute; left: 12px; top: 50%; width: 16px; height: 16px; color: var(--ink-400); transform: translateY(-50%); }
+    .result-search input { width: 100%; height: 42px; padding: 0 12px 0 38px; border: 1px solid var(--line-strong); border-radius: 11px; background: #fff; outline: 0; font-size: 12px; }
+    .result-search input:focus { border-color: #8baeff; box-shadow: 0 0 0 4px rgba(36,107,253,.08); }
+    .sort-select { height: 42px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 11px; background: #fff; color: var(--ink-700); font-size: 10px; }
+    .results-meta { margin: 0 0 12px; color: var(--ink-500); font-size: 10px; }
+
+    /* Course workspace */
+    .course-hero { position: relative; overflow: hidden; padding: 30px; border-radius: var(--radius-xl); background: var(--navy-950); color: #fff; }
+    .course-hero::after { content: ""; position: absolute; width: 260px; height: 260px; right: -80px; bottom: -170px; border-radius: 50%; background: rgba(36,107,253,.38); }
+    .course-hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; }
+    .course-breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; color: #8da3c9; font-size: 9px; }
+    .course-breadcrumb button { color: #a9bde1; }
+    .course-hero h1 { font-size: 31px; }
+    .course-hero p { margin-top: 7px; color: #a7b5cc; font-size: 11px; }
+    .course-hero-actions { display: flex; gap: 8px; margin-top: 20px; }
+    .course-hero-actions .btn-secondary { border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.09); color: #fff; }
+    .course-progress-ring { --progress: 35; width: 112px; height: 112px; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(#5d91ff calc(var(--progress)*1%),rgba(255,255,255,.12) 0); }
+    .course-progress-ring::before { content: ""; width: 82px; height: 82px; border-radius: 50%; background: var(--navy-950); }
+    .ring-copy { position: absolute; text-align: center; }
+    .ring-copy strong { display: block; font-size: 22px; }
+    .ring-copy span { color: #90a1bd; font-size: 8px; text-transform: uppercase; }
+    .course-tabs { display: flex; gap: 4px; margin: 20px 0; padding: 5px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+    .course-tab { flex: 1; min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 7px; border-radius: 9px; color: var(--ink-500); font-size: 10px; font-weight: 750; }
+    .course-tab svg { width: 15px; height: 15px; }
+    .course-tab.active { background: var(--blue-100); color: var(--blue-700); }
+    .overview-grid { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(300px,.75fr); gap: 18px; }
+    .overview-panel { padding: 20px; }
+    .overview-panel h2 { font-size: 16px; }
+    .overview-panel > p { margin-top: 5px; color: var(--ink-500); font-size: 10px; }
+    .focus-list { display: flex; flex-direction: column; gap: 9px; margin-top: 16px; }
+    .focus-item { display: flex; align-items: center; gap: 11px; padding: 12px; border-radius: 12px; background: #f8f9fc; }
+    .focus-number { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 9px; background: #fff; color: var(--blue-700); font-size: 10px; font-weight: 850; box-shadow: var(--shadow-sm); }
+    .focus-item strong { display: block; font-size: 10px; }
+    .focus-item span { color: var(--ink-500); font-size: 8px; }
+    .ai-course-card { position: relative; overflow: hidden; padding: 22px; background: var(--blue-600); color: #fff; }
+    .ai-course-card::after { content: ""; position: absolute; width: 140px; height: 140px; right: -60px; top: -70px; border-radius: 50%; background: rgba(255,255,255,.13); }
+    .ai-course-icon { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 18px; border-radius: 13px; background: rgba(255,255,255,.15); }
+    .ai-course-icon svg { width: 20px; height: 20px; }
+    .ai-course-card h3 { font-size: 17px; }
+    .ai-course-card p { margin-top: 7px; color: #d7e4ff; font-size: 10px; }
+    .ai-course-card .btn { width: 100%; margin-top: 20px; background: #fff; color: var(--blue-700); box-shadow: none; }
+    .roadmap-full { display: flex; flex-direction: column; gap: 12px; }
+    .roadmap-node { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; padding: 18px; }
+    .node-status { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; background: #eef2f8; color: var(--ink-500); }
+    .node-status.done { background: var(--green-100); color: var(--green-700); }
+    .node-status svg { width: 19px; height: 19px; }
+    .node-content h3 { font-size: 13px; }
+    .node-content p { margin-top: 5px; color: var(--ink-500); font-size: 9px; }
+    .node-badges { display: flex; gap: 6px; margin-top: 10px; }
+    .career-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    .career-card { padding: 20px; }
+    .career-icon { width: 40px; height: 40px; display: grid; place-items: center; margin-bottom: 14px; border-radius: 13px; background: var(--cyan-100); color: var(--cyan-600); }
+    .career-icon svg { width: 19px; height: 19px; }
+    .career-card h3 { font-size: 13px; }
+    .career-card p { margin-top: 6px; color: var(--ink-500); font-size: 10px; }
+    .opportunity-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .opportunity-card { display: flex; flex-direction: column; padding: 18px; }
+    .opportunity-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .opportunity-card time { color: var(--ink-500); font-size: 8px; }
+    .opportunity-card h3 { margin-top: 15px; font-size: 13px; }
+    .opportunity-card p { margin: 6px 0 16px; color: var(--ink-500); font-size: 9px; }
+    .opportunity-card .btn { margin-top: auto; align-self: flex-start; }
+
+    /* Contribution wizard */
+    .wizard-shell { max-width: 820px; margin: 0 auto; }
+    .stepper { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
+    .step { display: flex; align-items: center; gap: 9px; padding: 11px; border-radius: 12px; color: var(--ink-400); font-size: 9px; font-weight: 750; }
+    .step-number { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 8px; background: #e9edf4; color: var(--ink-500); font-weight: 850; }
+    .step.active { background: var(--blue-100); color: var(--blue-700); }
+    .step.active .step-number { background: var(--blue-600); color: #fff; }
+    .step.done { color: var(--green-700); }
+    .step.done .step-number { background: var(--green-100); color: var(--green-700); }
+    .wizard-card { overflow: hidden; }
+    .wizard-header { padding: 22px 24px 17px; border-bottom: 1px solid var(--line); }
+    .wizard-header h2 { font-size: 18px; }
+    .wizard-header p { margin-top: 5px; color: var(--ink-500); font-size: 10px; }
+    .wizard-body { padding: 24px; }
+    .wizard-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--line); background: #fafbfc; }
+    .dropzone { min-height: 220px; display: grid; place-items: center; padding: 24px; border: 2px dashed #cfd7e5; border-radius: 18px; background: #fafbfd; text-align: center; transition: var(--ease); }
+    .dropzone:hover, .dropzone.dragging { border-color: var(--blue-500); background: var(--blue-50); }
+    .drop-icon { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 14px; border-radius: 18px; background: var(--blue-100); color: var(--blue-600); }
+    .drop-icon svg { width: 27px; height: 27px; }
+    .dropzone h3 { font-size: 15px; }
+    .dropzone p { margin-top: 5px; color: var(--ink-500); font-size: 10px; }
+    .dropzone .btn { margin-top: 17px; }
+    .selected-file { display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid #bcebd8; border-radius: 15px; background: #f0fdf7; }
+    .file-icon { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 12px; background: #fff; color: var(--green-700); box-shadow: var(--shadow-sm); }
+    .file-icon svg { width: 20px; height: 20px; }
+    .file-meta { min-width: 0; flex: 1; }
+    .file-meta strong { display: block; overflow: hidden; color: var(--green-700); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .file-meta span { color: var(--ink-500); font-size: 9px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; }
+    .form-grid .full { grid-column: 1/-1; }
+    .request-match { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; padding: 13px; border: 1px solid #f4d58d; border-radius: 13px; background: #fffbeb; }
+    .request-match strong { display: block; color: #92400e; font-size: 10px; }
+    .request-match span { color: #a16207; font-size: 8px; }
+    .review-summary { display: flex; flex-direction: column; gap: 10px; }
+    .summary-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .summary-row span { color: var(--ink-500); font-size: 10px; }
+    .summary-row strong { max-width: 65%; font-size: 11px; text-align: right; }
+    .consent-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 16px; padding: 12px; border-radius: 12px; background: #f7f9fc; }
+    .consent-row input { margin-top: 2px; accent-color: var(--blue-600); }
+    .consent-row label { color: var(--ink-700); font-size: 9px; line-height: 1.5; }
+    .publish-progress { padding: 60px 24px; text-align: center; }
+    .progress-spinner { width: 54px; height: 54px; margin: 0 auto 18px; border: 5px solid var(--blue-100); border-top-color: var(--blue-600); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .publish-progress h3 { font-size: 18px; }
+    .publish-progress p { margin-top: 7px; color: var(--ink-500); font-size: 10px; }
+    .success-state { padding: 50px 24px; text-align: center; }
+    .success-icon { width: 66px; height: 66px; display: grid; place-items: center; margin: 0 auto 18px; border-radius: 50%; background: var(--green-100); color: var(--green-700); }
+    .success-icon svg { width: 30px; height: 30px; }
+    .success-state h2 { font-size: 22px; }
+    .success-state p { max-width: 420px; margin: 7px auto 20px; color: var(--ink-500); font-size: 11px; }
+    .points-earned { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 22px; padding: 8px 12px; border-radius: 999px; background: var(--amber-100); color: var(--amber-600); font-size: 10px; font-weight: 850; }
+
+    /* Community */
+    .segmented { display: inline-flex; gap: 4px; margin-bottom: 20px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .segment { min-height: 36px; padding: 0 15px; border-radius: 9px; color: var(--ink-500); font-size: 10px; font-weight: 750; }
+    .segment.active { background: var(--blue-100); color: var(--blue-700); }
+    .request-list { display: flex; flex-direction: column; gap: 10px; }
+    .request-card { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 18px; padding: 17px; }
+    .request-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .request-card h3 { font-size: 13px; }
+    .request-card p { margin-top: 4px; color: var(--ink-500); font-size: 9px; }
+    .request-actions { display: flex; align-items: center; gap: 8px; }
+    .vote-button { min-width: 42px; height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink-500); }
+    .vote-button svg { width: 14px; height: 14px; }
+    .vote-button span { margin-top: -1px; font-size: 8px; font-weight: 850; }
+    .vote-button.active { border-color: #9eb9f2; background: var(--blue-100); color: var(--blue-700); }
+    .leaderboard-card { overflow: hidden; }
+    .leader-row { display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 12px; padding: 14px 18px; }
+    .leader-row + .leader-row { border-top: 1px solid var(--line); }
+    .leader-rank { color: var(--ink-500); font-size: 12px; font-weight: 850; text-align: center; }
+    .leader-person { display: flex; align-items: center; gap: 10px; }
+    .leader-avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--blue-100); color: var(--blue-700); font-size: 9px; font-weight: 850; }
+    .leader-person strong { display: block; font-size: 11px; }
+    .leader-person span { color: var(--ink-500); font-size: 8px; }
+    .leader-points { color: var(--blue-700); font-size: 11px; font-weight: 850; }
+
+    /* Panels */
+    .panel-backdrop { position: fixed; inset: 0; z-index: 90; visibility: hidden; opacity: 0; background: rgba(8,17,38,.48); backdrop-filter: blur(2px); transition: var(--ease); }
+    .panel-backdrop.visible { visibility: visible; opacity: 1; }
+    .drawer { position: fixed; top: 0; bottom: 0; right: 0; z-index: 100; width: min(480px,100%); display: flex; flex-direction: column; visibility: hidden; background: #fff; box-shadow: var(--shadow-lg); transform: translateX(100%); transition: transform 260ms ease, visibility 0s linear 260ms; }
+    .drawer.open { visibility: visible; transform: translateX(0); transition-delay: 0s; }
+    .drawer-head { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .drawer-head-left { min-width: 0; display: flex; align-items: center; gap: 11px; }
+    .drawer-head-icon { width: 38px; height: 38px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 12px; background: var(--blue-100); color: var(--blue-600); }
+    .drawer-head-icon svg { width: 18px; height: 18px; }
+    .drawer-head h2 { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+    .drawer-head p { margin-top: 2px; color: var(--ink-500); font-size: 8px; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .drawer-foot { display: flex; gap: 9px; padding: 14px 18px; border-top: 1px solid var(--line); background: #fafbfc; }
+    .drawer-foot .btn { flex: 1; }
+    .detail-block + .detail-block { margin-top: 19px; }
+    .detail-label { margin-bottom: 8px; color: var(--ink-400); font-size: 8px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+    .resource-preview { max-height: 190px; overflow-y: auto; padding: 15px; border: 1px solid var(--line); border-radius: 13px; background: #f8fafc; color: var(--ink-700); font-size: 10px; line-height: 1.65; }
+    .quality-panel { padding: 15px; border: 1px solid #c7ecd9; border-radius: 14px; background: #f0fdf7; }
+    .quality-panel-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .quality-panel h3 { color: var(--green-700); font-size: 12px; }
+    .quality-panel p { margin-top: 4px; color: #39715f; font-size: 9px; }
+    .quality-number { color: var(--green-700); font-size: 20px; font-weight: 850; }
+    .quality-signals { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 12px; }
+    .signal { padding: 9px 6px; border-radius: 9px; background: rgba(255,255,255,.7); text-align: center; }
+    .signal strong { display: block; font-size: 10px; }
+    .signal span { color: var(--ink-500); font-size: 7px; }
+    .rating-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px; border: 1px solid var(--line); border-radius: 13px; }
+    .rating-copy strong { display: block; font-size: 10px; }
+    .rating-copy span { color: var(--ink-500); font-size: 8px; }
+    .star-buttons { display: flex; gap: 2px; }
+    .star-button { padding: 2px; color: #c5cbd6; }
+    .star-button svg { width: 18px; height: 18px; }
+    .star-button.active { color: #f2aa20; }
+    .star-button.active svg { fill: currentColor; }
+    .ai-drawer { width: min(440px,100%); background: #f8fafc; }
+    .ai-context { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 18px 12px; padding: 10px 12px; border: 1px solid #dce6fb; border-radius: 11px; background: var(--blue-50); }
+    .ai-context span { color: var(--ink-500); font-size: 8px; }
+    .ai-context strong { color: var(--blue-700); font-size: 9px; }
+    .chat-body { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding: 0 18px 16px; }
+    .chat-message { max-width: 88%; padding: 11px 13px; border-radius: 14px; font-size: 10px; line-height: 1.55; }
+    .chat-message.bot { align-self: flex-start; border: 1px solid var(--line); border-top-left-radius: 4px; background: #fff; color: var(--ink-700); }
+    .chat-message.user { align-self: flex-end; border-top-right-radius: 4px; background: var(--blue-600); color: #fff; }
+    .source-card { margin-top: 8px; padding: 8px; border-radius: 9px; background: var(--blue-50); color: var(--blue-700); font-size: 8px; }
+    .source-card strong { display: block; margin-bottom: 2px; }
+    .quick-prompts { display: flex; gap: 6px; overflow-x: auto; padding: 0 18px 10px; scrollbar-width: none; }
+    .quick-prompts::-webkit-scrollbar { display: none; }
+    .quick-prompt { flex: 0 0 auto; padding: 8px 10px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink-700); font-size: 8px; font-weight: 700; }
+    .chat-input { display: flex; gap: 8px; padding: 12px 18px 16px; border-top: 1px solid var(--line); background: #fff; }
+    .chat-input input { min-width: 0; flex: 1; height: 42px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 11px; outline: 0; font-size: 11px; }
+    .chat-send { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 11px; background: var(--blue-600); color: #fff; }
+    .chat-send svg { width: 17px; height: 17px; }
+    .modal { position: fixed; top: 50%; left: 50%; z-index: 110; width: min(520px,calc(100% - 28px)); visibility: hidden; overflow: hidden; border-radius: 20px; background: #fff; box-shadow: var(--shadow-lg); opacity: 0; transform: translate(-50%,-46%) scale(.98); transition: var(--ease); }
+    .modal.open { visibility: visible; opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+    .modal-head h2 { font-size: 16px; }
+    .modal-body { padding: 20px; }
+    .modal-form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    .modal-form .full { grid-column: 1/-1; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 9px; padding: 14px 20px; border-top: 1px solid var(--line); background: #fafbfc; }
+    .toast-stack { position: fixed; top: 18px; right: 18px; z-index: 150; display: flex; flex-direction: column; gap: 8px; }
+    .toast { min-width: 250px; max-width: 360px; display: flex; align-items: center; gap: 9px; padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--blue-600); border-radius: 12px; background: #fff; box-shadow: var(--shadow-md); color: var(--ink-700); font-size: 10px; font-weight: 700; animation: toastIn 220ms ease both; }
+    .toast.success { border-left-color: var(--green-700); }
+    .toast.error { border-left-color: var(--red-600); }
+    .toast svg { width: 16px; height: 16px; flex: 0 0 auto; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } }
+    .mobile-nav { display: none; }
+
+    /* Refined visual system */
+    .topbar { padding-inline: 34px; border-color: color-mix(in srgb,var(--line) 82%,transparent); background: var(--header-bg); }
+    .main { max-width: 1320px; padding: 38px 38px 84px; }
+    .top-search { max-width: 610px; }
+    .top-search input { height: 44px; background: var(--surface-soft); font-size: 13px; }
+    .top-search input:focus { background: var(--surface); }
+    .top-icon, .course-context-pill { background: var(--surface); }
+    .top-icon { position: relative; }
+    .top-icon::after { content: ""; position: absolute; top: 8px; right: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--blue-600); opacity: 0; }
+    .notification-button::after { opacity: 1; }
+    .theme-toggle svg { transition: transform .22s ease; }
+    .theme-toggle:hover svg { transform: rotate(12deg); }
+
+    .page-head { margin-bottom: 28px; }
+    .page-head h1 { font-size: clamp(30px,3vw,40px); line-height: 1.08; }
+    .page-head p { margin-top: 10px; font-size: 14px; line-height: 1.65; }
+    .eyebrow { margin-bottom: 9px; font-size: 11px; }
+    .section-head { margin: 34px 0 16px; }
+    .section-head h2 { font-size: 21px; }
+    .section-head p { margin-top: 5px; font-size: 12px; }
+    .section-link { font-size: 12px; }
+
+    .card { background: var(--surface); box-shadow: var(--shadow-sm); }
+    .btn { min-height: 42px; padding-inline: 17px; border-radius: 12px; font-size: 13px; }
+    .btn-small { min-height: 36px; padding-inline: 13px; font-size: 11px; }
+    .btn-secondary, .icon-button { background: var(--surface); }
+    .btn-secondary:hover, .icon-button:hover { background: var(--surface-tint); }
+    .field { gap: 8px; }
+    .field label { font-size: 11px; }
+    .field input, .field select, .field textarea, .result-search input, .sort-select, .chat-input input { background: var(--input-bg); color: var(--ink-900); }
+    .field input, .field select, .result-search input, .sort-select { height: 45px; font-size: 13px; }
+    .field textarea { font-size: 13px; }
+    select { color-scheme: inherit; }
+    .badge { padding: 6px 9px; font-size: 10px; }
+    .badge-gray { background: var(--neutral-soft); color: var(--ink-500); }
+    .empty-state { background: color-mix(in srgb,var(--surface) 70%,transparent); }
+
+    .home-hero { min-height: 316px; padding: 43px 44px; background: radial-gradient(circle at 88% 18%,rgba(50,103,228,.45),transparent 30%),linear-gradient(135deg,#071127 0%,#0a1733 56%,#0c1c3d 100%); }
+    .home-hero h1 { font-size: clamp(34px,4vw,48px); }
+    .home-hero .hero-desc { max-width: 620px; margin-top: 16px; font-size: 14px; line-height: 1.65; }
+    .hero-kicker { font-size: 11px; }
+    .hero-search { max-width: 610px; margin-top: 27px; padding: 7px; }
+    .hero-search input { height: 44px; font-size: 13px; }
+    .exam-card { padding: 23px; }
+    .exam-label, .exam-progress-label { font-size: 10px; }
+    .exam-days { min-width: 48px; height: 31px; font-size: 11px; }
+    .exam-card h3 { font-size: 20px; }
+    .exam-card p { font-size: 11px; }
+
+    .platform-stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+    .stat-card { min-width: 0; display: flex; align-items: center; gap: 12px; padding: 16px 18px; }
+    .stat-icon { width: 38px; height: 38px; display: grid; flex: 0 0 auto; place-items: center; border-radius: 12px; background: var(--blue-100); color: var(--blue-700); }
+    .stat-icon svg { width: 18px; height: 18px; }
+    .stat-card strong { display: block; font-size: 18px; line-height: 1; }
+    .stat-card span:last-child { display: block; margin-top: 5px; color: var(--ink-500); font-size: 11px; }
+
+    .continue-card, .next-step-card { min-height: 120px; padding: 21px; }
+    .continue-card h3, .next-step-card h3 { font-size: 15px; }
+    .continue-card p, .next-step-card p { font-size: 11px; }
+    .next-step-card { background: var(--blue-50); border-color: color-mix(in srgb,var(--blue-600) 20%,var(--line)); }
+    .next-icon { background: var(--surface); }
+
+    .resource-grid { gap: 16px; }
+    .resource-card { --resource-accent: var(--blue-600); position: relative; min-height: 238px; padding: 19px; overflow: hidden; border-top: 3px solid var(--resource-accent); }
+    .resource-card::before { content: ""; position: absolute; width: 130px; height: 130px; right: -76px; top: -84px; border-radius: 50%; background: color-mix(in srgb,var(--resource-accent) 12%,transparent); pointer-events: none; }
+    .resource-card:hover { transform: translateY(-3px); border-color: var(--resource-accent); box-shadow: var(--shadow-md); }
+    .resource-card-top { position: relative; z-index: 1; }
+    .type-chip { font-size: 10px; }
+    .type-chip-icon { width: 31px; height: 31px; border-radius: 10px; background: color-mix(in srgb,var(--resource-accent) 14%,var(--surface)); color: var(--resource-accent); }
+    .type-chip-icon svg { width: 15px; height: 15px; }
+    .resource-card h3 { margin-top: 16px; font-size: 16px; line-height: 1.38; }
+    .resource-sub { margin-top: 7px; font-size: 11px; line-height: 1.5; }
+    .resource-author { display: flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--ink-500); font-size: 10px; }
+    .resource-avatar { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-tint); color: var(--blue-700); font-size: 8px; font-weight: 800; }
+    .resource-actions-top { display: flex; align-items: center; gap: 7px; }
+    .bookmark-button { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink-400); }
+    .bookmark-button:hover, .bookmark-button.saved { border-color: color-mix(in srgb,var(--blue-600) 45%,var(--line)); background: var(--blue-100); color: var(--blue-700); }
+    .bookmark-button svg { width: 14px; height: 14px; }
+    .bookmark-button.saved svg { fill: currentColor; }
+    .verified { font-size: 9px; }
+    .tag-row { margin-top: 13px; }
+    .mini-tag { padding: 5px 7px; background: var(--tag-bg); color: var(--ink-500); font-size: 9px; }
+    .resource-card-footer { padding-top: 17px; }
+    .quality-score { gap: 9px; }
+    .quality-score strong { font-size: 14px; }
+    .quality-score span { font-size: 9px; }
+    .quality-bar { width: 52px; background: var(--neutral-soft); }
+    .preview-link { font-size: 11px; }
+    .saved-filter.active { border-color: color-mix(in srgb,var(--blue-600) 45%,var(--line)); background: var(--blue-100); color: var(--blue-700); }
+
+    .context-panel { padding: 22px; }
+    .context-title { margin-bottom: 18px; font-size: 13px; }
+    .context-title small { margin-left: 8px; color: var(--ink-500); font-size: 12px; font-weight: 500; }
+    .course-multi { position: relative; }
+    .multi-select-trigger { width: 100%; height: 45px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 11px; background: var(--input-bg); color: var(--ink-900); font-size: 13px; text-align: left; }
+    .multi-select-trigger svg { width: 16px; height: 16px; color: var(--ink-500); transition: transform var(--ease); }
+    .course-multi.open .multi-select-trigger { border-color: #8baeff; box-shadow: 0 0 0 4px rgba(36,107,253,.08); }
+    .course-multi.open .multi-select-trigger svg { transform: rotate(180deg); }
+    .multi-select-menu { position: absolute; top: calc(100% + 7px); left: 0; right: 0; z-index: 45; display: none; max-height: 290px; overflow-y: auto; padding: 7px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-raised); box-shadow: var(--shadow-lg); }
+    .course-multi.open .multi-select-menu { display: grid; gap: 4px; }
+    .multi-course-option { width: 100%; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; text-align: left; }
+    .multi-course-option:hover { background: var(--surface-tint); }
+    .multi-check { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 6px; color: transparent; }
+    .multi-check svg { width: 13px; height: 13px; }
+    .multi-course-option.selected .multi-check { border-color: var(--blue-600); background: var(--blue-600); color: #fff; }
+    .multi-course-option strong { display: block; font-size: 12px; }
+    .multi-course-option small { display: block; margin-top: 2px; color: var(--ink-500); font-size: 11px; }
+    .selected-courses-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 16px; padding-top: 15px; border-top: 1px solid var(--line); }
+    .selected-courses-label { color: var(--ink-700); font-size: 12px; font-weight: 750; }
+    .selected-course-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .selected-course-chip { display: inline-flex; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); }
+    .selected-course-chip > button:first-child { min-height: 30px; padding: 0 9px; color: var(--ink-700); font-size: 11px; font-weight: 800; }
+    .selected-course-chip.active { border-color: color-mix(in srgb,var(--blue-600) 50%,var(--line)); background: var(--blue-100); }
+    .selected-course-chip.active > button:first-child { color: var(--blue-700); }
+    .remove-course { width: 28px; height: 30px; display: grid; place-items: center; border-left: 1px solid var(--line); color: var(--ink-400); }
+    .remove-course:hover:not([disabled]) { background: var(--red-100); color: var(--red-600); }
+    .remove-course[disabled] { opacity: .35; cursor: not-allowed; }
+    .remove-course svg { width: 12px; height: 12px; }
+    .selected-courses-hint { margin-left: auto; color: var(--ink-500); font-size: 11px; }
+    .category-strip { margin: 18px 0; gap: 8px; }
+    .category-chip { min-height: 40px; padding-inline: 13px; background: var(--surface); font-size: 11px; }
+    .results-toolbar { gap: 10px; }
+    .sort-select { min-width: 150px; }
+    .results-meta { margin: 16px 0 13px; font-size: 11px; }
+
+    .resource-footer-actions { display: flex; align-items: center; gap: 10px; }
+    .download-link { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-700); font-size: 11px; font-weight: 750; }
+    .download-link:hover { color: var(--blue-700); }
+    .download-link svg { width: 14px; height: 14px; }
+    .resource-detail-title { margin-top: 17px; font-size: 24px; line-height: 1.25; }
+    .resource-detail-meta { margin-top: 9px; color: var(--ink-500); font-size: 13px; line-height: 1.7; }
+    .download-ready { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 14px; border: 1px solid color-mix(in srgb,var(--blue-600) 25%,var(--line)); border-radius: 14px; background: var(--blue-50); }
+    .download-ready-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; background: var(--surface); color: var(--blue-700); }
+    .download-ready-icon svg { width: 18px; height: 18px; }
+    .download-ready strong { display: block; font-size: 13px; }
+    .download-ready small { display: block; margin-top: 3px; color: var(--ink-500); font-size: 11px; }
+
+    .course-hero { padding: 36px; background: radial-gradient(circle at 86% 10%,rgba(51,109,238,.4),transparent 32%),linear-gradient(135deg,#061126,#0b1935); }
+    .course-hero h1 { font-size: clamp(31px,4vw,42px); }
+    .course-hero p { font-size: 13px; }
+    .course-breadcrumb { font-size: 10px; }
+    .course-tabs { padding: 6px; background: var(--surface); }
+    .course-tab { min-height: 43px; font-size: 12px; }
+    .overview-panel { padding: 24px; }
+    .overview-panel > p { font-size: 12px; }
+    .focus-item { padding: 14px; background: var(--surface-soft); }
+    .focus-number { background: var(--surface); }
+    .focus-item strong { font-size: 12px; }
+    .focus-item span span { font-size: 10px; }
+    .ai-course-card { padding: 25px; }
+    .ai-course-card h3 { font-size: 18px; }
+    .ai-course-card p { font-size: 12px; }
+
+    .wizard-header { padding: 24px 26px 20px; }
+    .wizard-header h2 { font-size: 20px; }
+    .wizard-header p { font-size: 12px; }
+    .wizard-body { padding: 26px; }
+    .wizard-footer, .drawer-foot, .modal-foot { background: var(--surface-soft); }
+    .dropzone { background: var(--surface-soft); border-color: var(--line-strong); }
+    .consent-row { background: var(--surface-soft); }
+    .selected-file { background: color-mix(in srgb,var(--green-100) 75%,var(--surface)); border-color: color-mix(in srgb,var(--green-700) 35%,var(--line)); }
+    .file-icon { background: var(--surface); }
+
+    .segmented, .vote-button { background: var(--surface); }
+    .request-list { gap: 12px; }
+    .request-card { padding: 20px 22px; }
+    .request-card h3 { font-size: 15px; }
+    .request-card p { font-size: 11px; }
+    .leader-row { min-height: 68px; }
+    .leader-person strong { font-size: 13px; }
+    .leader-person > span > span { font-size: 10px; }
+
+    .opportunity-row, .category-chip, .drawer, .modal, .toast, .chat-message.bot, .quick-prompt, .chat-input { background: var(--surface); }
+    .drawer-head, .modal-head { background: var(--surface-raised); }
+    .ai-drawer { background: var(--surface-soft); }
+    .resource-preview { background: var(--surface-soft); font-size: 12px; }
+    .quality-panel { background: color-mix(in srgb,var(--green-100) 62%,var(--surface)); border-color: color-mix(in srgb,var(--green-700) 30%,var(--line)); }
+    .quality-panel p { color: var(--ink-500); font-size: 10px; }
+    .chat-message { max-width: 88%; font-size: 12px; }
+    .quick-prompt { font-size: 10px; }
+    .modal-foot { border-color: var(--line); }
+
+    html[data-theme="dark"] .sidebar { background: #050a15; border-right: 1px solid #172238; }
+    html[data-theme="dark"] .brand-mark { box-shadow: 0 8px 24px rgba(79,130,255,.28); }
+    html[data-theme="dark"] .home-hero, html[data-theme="dark"] .course-hero { box-shadow: 0 24px 60px rgba(0,0,0,.32); }
+    html[data-theme="dark"] .exam-card .btn, html[data-theme="dark"] .ai-course-card .btn, html[data-theme="dark"] .tutor-side-button { background: #f7f9fc; color: #102044; }
+    html[data-theme="dark"] .mini-tag { background: var(--tag-bg); }
+    html[data-theme="dark"] .mobile-brand strong { color: var(--ink-900); }
+    html[data-theme="dark"] .progress-inline, html[data-theme="dark"] .quality-bar { background: #223047; }
+    html[data-theme="dark"] .request-match { background: #35280f; border-color: #73531a; }
+    html[data-theme="dark"] .request-match strong { color: #ffd780; }
+    html[data-theme="dark"] .request-match span { color: #d9ad54; }
+    html[data-theme="dark"] .mobile-nav { background: rgba(17,26,42,.94); box-shadow: 0 14px 40px rgba(0,0,0,.38); }
+    html[data-theme="dark"] .top-search input::placeholder, html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder { color: #68778e; }
+
+    /* Readability pass: no essential information below a comfortable UI size */
+    body { font-size: 15px; }
+    .side-label { font-size: 11px; }
+    .side-link { font-size: 14px; }
+    .course-code-dark { font-size: 11px; }
+    .current-course-name { font-size: 14px; }
+    .current-course-meta, .tutor-side-card p { font-size: 11px; }
+    .tutor-side-card strong { font-size: 14px; }
+    .tutor-side-button { font-size: 12px; }
+    .context-copy strong, .user-copy strong { font-size: 12px; }
+    .context-copy span, .user-copy span { font-size: 10px; }
+    .page-head p { font-size: 15px; }
+    .section-head p { font-size: 13px; }
+    .section-link { font-size: 13px; }
+    .field label { font-size: 12px; }
+    .field input, .field select, .result-search input, .sort-select { font-size: 14px; }
+    .badge { font-size: 11px; }
+    .empty-state p { font-size: 13px; }
+    .hero-kicker { font-size: 12px; }
+    .exam-label, .exam-progress-label { font-size: 11px; }
+    .exam-card p { font-size: 12px; }
+    .continue-card p, .next-step-card p { font-size: 12px; }
+    .progress-value, .next-step-card small { font-size: 10px; }
+    .type-chip { font-size: 11px; }
+    .verified { font-size: 10px; }
+    .resource-card h3 { font-size: 17px; }
+    .resource-sub { font-size: 12px; }
+    .resource-author { font-size: 11px; }
+    .resource-avatar { font-size: 9px; }
+    .mini-tag { font-size: 10px; }
+    .quality-score span { font-size: 10px; }
+    .preview-link, .download-link { font-size: 12px; }
+    .roadmap-mini-row strong { font-size: 13px; }
+    .roadmap-mini-row span { font-size: 10px; }
+    .opportunity-row h4 { font-size: 12px; }
+    .opportunity-row p { font-size: 10px; }
+    .category-chip { font-size: 12px; }
+    .results-meta { font-size: 12px; }
+    .course-breadcrumb { font-size: 11px; }
+    .course-hero p { font-size: 13px; }
+    .ring-copy span { font-size: 10px; }
+    .course-tab { font-size: 13px; }
+    .overview-panel > p, .node-content p, .career-card p, .opportunity-card p { font-size: 12px; }
+    .focus-item strong { font-size: 13px; }
+    .focus-item span span { font-size: 11px; }
+    .opportunity-card time { font-size: 10px; }
+    .step { font-size: 11px; }
+    .wizard-header p, .dropzone p, .publish-progress p { font-size: 12px; }
+    .file-meta strong { font-size: 13px; }
+    .file-meta span, .request-match span { font-size: 11px; }
+    .summary-row span, .summary-row strong, .consent-row label { font-size: 12px; }
+    .success-state p { font-size: 13px; }
+    .segment { font-size: 12px; }
+    .request-card p { font-size: 12px; }
+    .vote-button span { font-size: 10px; }
+    .leader-person strong { font-size: 13px; }
+    .leader-person > span > span { font-size: 11px; }
+    .leader-points { font-size: 13px; }
+    .drawer-head p, .detail-label { font-size: 10px; }
+    .resource-preview { font-size: 13px; }
+    .quality-panel p, .signal strong, .rating-copy strong { font-size: 12px; }
+    .rating-copy span { font-size: 11px; }
+    .ai-context span, .ai-context strong { font-size: 11px; }
+    .chat-message { font-size: 13px; }
+    .source-card, .quick-prompt { font-size: 11px; }
+    .chat-input input { font-size: 13px; }
+    .toast { font-size: 12px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+
+    @media (max-width: 1080px) {
+      .resource-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .home-grid, .overview-grid { grid-template-columns: 1fr; }
+      .opportunity-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .platform-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .user-copy { display: none; }
+    }
+
+    @media (max-width: 780px) {
+      :root { --topbar: 64px; }
+      body { padding-bottom: 76px; }
+      .sidebar { display: none; }
+      .app-frame { margin-left: 0; }
+      .topbar { height: var(--topbar); padding: 0 14px; gap: 9px; }
+      .mobile-brand { display: flex; align-items: center; gap: 8px; }
+      .mobile-brand .brand-mark { width: 34px; height: 34px; border-radius: 11px; }
+      .mobile-brand strong { color: var(--navy-900); font-size: 15px; letter-spacing: .02em; }
+      .top-search { display: none; }
+      .topbar-actions { gap: 7px; }
+      .course-context-pill { max-width: 145px; height: 38px; padding: 0 9px; }
+      .context-copy strong { max-width: 85px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .context-copy span { display: none; }
+      .top-icon { display: none; }
+      .theme-toggle { display: grid; width: 38px; height: 38px; }
+      .user-menu { padding-left: 0; }
+      .avatar { width: 36px; height: 36px; }
+      .main { padding: 24px 16px 96px; }
+      .page-head { align-items: flex-start; margin-bottom: 18px; }
+      .page-head .btn { flex: 0 0 auto; }
+      .page-head h1 { font-size: 26px; }
+      .home-hero { grid-template-columns: 1fr; gap: 22px; min-height: 0; padding: 25px 22px; }
+      .home-hero h1 { font-size: 32px; line-height: 1.1; }
+      .home-hero .hero-desc { font-size: 13px; }
+      .hero-search { flex-direction: column; }
+      .hero-search .btn { width: 100%; }
+      .exam-card { display: none; }
+      .continue-card { grid-template-columns: auto 1fr; }
+      .continue-card > .btn { grid-column: 1/-1; width: 100%; }
+      .resource-grid, .career-grid, .opportunity-grid { grid-template-columns: 1fr; }
+      .platform-stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+      .stat-card { padding: 13px; }
+      .stat-card strong { font-size: 16px; }
+      .stat-card span:last-child { font-size: 10px; }
+      .resource-card { min-height: 0; }
+      .context-title small { display: block; margin: 4px 0 0 39px; }
+      .selected-courses-hint { width: 100%; margin-left: 0; line-height: 1.45; }
+      .multi-select-menu { max-height: 250px; }
+      .context-grid { grid-template-columns: 1fr; }
+      .results-toolbar { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: stretch; }
+      .result-search { grid-column: 1/-1; }
+      .sort-select, .saved-filter { width: 100%; min-width: 0; }
+      .course-hero { padding: 24px 20px; }
+      .course-hero-grid { grid-template-columns: 1fr; }
+      .course-progress-ring { display: none; }
+      .course-hero h1 { font-size: 27px; }
+      .course-hero-actions { flex-direction: column; }
+      .course-hero-actions .btn { width: 100%; }
+      .course-tabs { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); overflow: visible; }
+      .course-tab { min-width: 0; padding: 0 8px; }
+      .roadmap-node { grid-template-columns: auto 1fr; }
+      .roadmap-node > .btn { grid-column: 1/-1; width: 100%; }
+      .stepper { gap: 4px; }
+      .step { justify-content: center; padding: 8px 4px; }
+      .step > span:last-child { display: none; }
+      .wizard-body, .wizard-header { padding-left: 18px; padding-right: 18px; }
+      .wizard-footer { padding: 14px 18px; }
+      .form-grid, .modal-form { grid-template-columns: 1fr; }
+      .form-grid .full, .modal-form .full { grid-column: auto; }
+      .request-card { grid-template-columns: 1fr; }
+      .request-actions { justify-content: space-between; }
+      .drawer { top: var(--topbar); bottom: 76px; width: 100%; }
+      .drawer-head { min-height: 64px; }
+      .panel-backdrop { bottom: 76px; top: var(--topbar); }
+      .modal { max-height: calc(100vh - 110px); overflow-y: auto; }
+      .toast-stack { top: 72px; left: 12px; right: 12px; }
+      .toast { width: 100%; min-width: 0; max-width: none; }
+      .category-strip { display: none; }
+      .mobile-category-field { display: flex; margin: 16px 0 12px; }
+      .mobile-nav { position: fixed; left: 10px; right: 10px; bottom: 8px; z-index: 120; height: 60px; display: grid; grid-template-columns: repeat(5,1fr); padding: 5px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.96); box-shadow: 0 12px 34px rgba(8,17,38,.18); backdrop-filter: blur(16px); }
+      .mobile-link { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 13px; color: var(--ink-400); font-size: 9px; font-weight: 750; }
+      .mobile-link svg { width: 18px; height: 18px; }
+      .mobile-link.active { background: var(--blue-600); color: #fff; }
+    }
+
+    @media (max-width: 430px) {
+      .topbar { padding-inline: 11px; }
+      .mobile-brand strong { display: block; }
+      .course-context-pill { max-width: 126px; }
+      .main { padding-inline: 14px; }
+      .platform-stats { grid-template-columns: 1fr 1fr; }
+      .stat-icon { width: 34px; height: 34px; }
+      .page-head { flex-direction: column; }
+      .page-head > .btn { width: 100%; }
+      .drawer-foot { gap: 6px; padding-inline: 10px; }
+      .drawer-foot .btn { min-width: 0; padding-inline: 7px; font-size: 11px; }
+      .download-ready { grid-template-columns: auto 1fr; }
+      .download-ready .btn { grid-column: 1/-1; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" aria-label="Primary navigation">
+    <button class="brand" onclick="navigate('home')" aria-label="Go to Masdar home">
+      <span class="brand-mark"><i data-lucide="library-big"></i></span>
+      <span class="brand-copy"><span class="brand-name">MASDAR</span><span class="brand-ar">مصدر</span></span>
+    </button>
+    <div class="side-label">Workspace</div>
+    <nav class="side-nav">
+      <button class="side-link active" data-nav="home" onclick="navigate('home')"><i data-lucide="home"></i><span>Home</span></button>
+      <button class="side-link" data-nav="courses" onclick="openCourseCatalog()"><i data-lucide="book-open"></i><span>All courses</span></button>
+      <button class="side-link" data-nav="explore" onclick="navigate('explore')"><i data-lucide="search"></i><span>Explore resources</span></button>
+      <button class="side-link" data-nav="contribute" onclick="navigate('contribute')"><i data-lucide="upload-cloud"></i><span>Contribute</span></button>
+      <button class="side-link" data-nav="community" onclick="navigate('community')"><i data-lucide="users"></i><span>Community</span></button>
+    </nav>
+    <div class="side-divider"></div>
+    <div class="side-label-row">
+      <div class="side-label">Current course</div>
+      <button class="side-action-link" onclick="openCourseCatalog()">Switch <i data-lucide="chevrons-up-down"></i></button>
+    </div>
+    <button class="current-course-card" id="sidebar-course" onclick="navigate('course')"></button>
+    <div class="sidebar-spacer"></div>
+    <div class="tutor-side-card">
+      <span class="tutor-side-icon"><i data-lucide="sparkles"></i></span>
+      <strong>Course-aware AI tutor</strong>
+      <p>Grounded in resources from your selected course.</p>
+      <button class="tutor-side-button" onclick="openTutor()">Ask the tutor</button>
+    </div>
+  </aside>
+
+  <div class="app-frame">
+    <header class="topbar">
+      <button class="mobile-brand" onclick="navigate('home')" aria-label="Go to Masdar home">
+        <span class="brand-mark"><i data-lucide="library-big"></i></span><strong>MASDAR</strong>
+      </button>
+      <div class="top-search">
+        <i data-lucide="search"></i>
+        <input type="search" id="global-search" placeholder="Search a topic, course, or resource" aria-label="Search the platform" onkeydown="if(event.key==='Enter')runGlobalSearch(this.value)">
+      </div>
+      <div class="topbar-actions">
+        <button class="course-context-pill" onclick="navigate('course')" aria-label="Open current course">
+          <span class="context-dot"></span><span class="context-copy" id="top-course"></span><i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--ink-400)"></i>
+        </button>
+        <button class="top-icon theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Switch color theme" title="Switch color theme"><i data-lucide="moon"></i></button>
+        <button class="top-icon demo-reset-button" onclick="resetDemoData()" aria-label="Reset demo data" title="Reset demo data"><i data-lucide="rotate-ccw"></i></button>
+        <button class="top-icon notification-button" onclick="notify('info','You are all caught up.')" aria-label="Notifications"><i data-lucide="bell"></i></button>
+        <div class="user-menu"><span class="avatar">SA</span><span class="user-copy" id="user-copy"></span></div>
+      </div>
+    </header>
+    <main class="main" id="app"></main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="mobile-link active" data-mobile-nav="home" onclick="navigate('home')"><i data-lucide="home"></i><span>Home</span></button>
+    <button class="mobile-link" data-mobile-nav="explore" onclick="navigate('explore')"><i data-lucide="search"></i><span>Explore</span></button>
+    <button class="mobile-link" data-mobile-nav="contribute" onclick="navigate('contribute')"><i data-lucide="upload-cloud"></i><span>Contribute</span></button>
+    <button class="mobile-link" data-mobile-nav="community" onclick="navigate('community')"><i data-lucide="users"></i><span>Community</span></button>
+    <button class="mobile-link" onclick="openTutor()"><i data-lucide="sparkles"></i><span>AI tutor</span></button>
+  </nav>
+
+  <button class="panel-backdrop" id="panel-backdrop" onclick="closePanels()" aria-label="Close open panel"></button>
+
+  <aside class="drawer resource-drawer" id="resource-drawer" aria-hidden="true" aria-label="Resource details">
+    <div class="drawer-head">
+      <div class="drawer-head-left"><span class="drawer-head-icon"><i data-lucide="file-text"></i></span><span><h2 id="resource-drawer-title">Resource details</h2><p>Preview and quality information</p></span></div>
+      <button class="icon-button" onclick="closePanels()" aria-label="Close resource details"><i data-lucide="x"></i></button>
+    </div>
+    <div class="drawer-body" id="resource-drawer-body"></div>
+    <div class="drawer-foot" id="resource-drawer-foot"></div>
+  </aside>
+
+  <aside class="drawer ai-drawer" id="ai-drawer" aria-hidden="true" aria-label="AI course tutor">
+    <div class="drawer-head">
+      <div class="drawer-head-left"><span class="drawer-head-icon"><i data-lucide="sparkles"></i></span><span><h2>Masdar AI tutor</h2><p>Answers grounded in course resources</p></span></div>
+      <button class="icon-button" onclick="closePanels()" aria-label="Close AI tutor"><i data-lucide="x"></i></button>
+    </div>
+    <div class="ai-context"><span>Active context</span><strong id="ai-context-course"></strong></div>
+    <div class="chat-body" id="chat-body"></div>
+    <div class="quick-prompts" id="quick-prompts"></div>
+    <div class="chat-input"><input id="ai-input" placeholder="Ask about this course..." aria-label="Ask the tutor" onkeydown="if(event.key==='Enter')sendAiMessage()"><button class="chat-send" onclick="sendAiMessage()" aria-label="Send question"><i data-lucide="send"></i></button></div>
+  </aside>
+
+  <section class="modal" id="request-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="request-modal-title">
+    <div class="modal-head"><h2 id="request-modal-title">Request a resource</h2><button class="icon-button" onclick="closePanels()" aria-label="Close request form"><i data-lucide="x"></i></button></div>
+    <div class="modal-body"><div class="modal-form" id="request-form"></div></div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="closePanels()">Cancel</button><button class="btn btn-primary" onclick="submitRequest()"><i data-lucide="send"></i>Post request</button></div>
+  </section>
+
+  <section class="modal" id="catalog-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="catalog-modal-title" style="width: min(720px, calc(100% - 24px));">
+    <div class="modal-head">
+      <h2 id="catalog-modal-title" style="display:flex;align-items:center;gap:8px"><i data-lucide="book-open" style="color:var(--blue-600)"></i><span>All Courses / الكورسات</span></h2>
+      <button class="icon-button" onclick="closePanels()" aria-label="Close courses modal"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body" style="max-height: calc(85vh - 130px); overflow-y: auto;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+        <div class="field"><label for="catalog-univ">University</label><select id="catalog-univ" onchange="filterCatalogUniv(this.value)"></select></div>
+        <div class="field"><label for="catalog-major">Major</label><select id="catalog-major" onchange="filterCatalogMajor(this.value)"></select></div>
+      </div>
+      <div class="result-search" style="margin-bottom: 16px;">
+        <i data-lucide="search"></i>
+        <input type="search" id="catalog-search" placeholder="Search course by code or name (e.g. MATH 201, CS 211)..." aria-label="Search courses" oninput="filterCatalogSearch(this.value)">
+      </div>
+      <div id="catalog-courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px;"></div>
+    </div>
+  </section>
+
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    window.lucide = window.lucide || { createIcons() {} };
+
+    const STORAGE_KEY = 'masdar-redesign-v3';
+    const THEME_KEY = 'masdar-theme';
+    const categories = [
+      { value: 'All', label: 'All resources', icon: 'layout-grid' },
+      { value: 'Previous Exam', label: 'Previous exams', icon: 'file-check-2' },
+      { value: 'Assignment', label: 'Assignments', icon: 'clipboard-list' },
+      { value: 'Quiz Bank', label: 'Quiz banks', icon: 'circle-help' },
+      { value: 'Lecture Summary', label: 'Lecture summaries', icon: 'notebook-tabs' },
+      { value: 'Cheat Sheet', label: 'Cheat sheets', icon: 'zap' },
+      { value: 'Student Note', label: 'Student notes', icon: 'sticky-note' },
+      { value: 'Recommended Video', label: 'Videos', icon: 'play-square' },
+      { value: 'External Resource', label: 'External links', icon: 'link' }
+    ];
+
+    const baseData = {
+      universities: [
+        { id: 1, name: 'Jordan University of Science and Technology' },
+        { id: 2, name: 'University of Jordan' },
+        { id: 3, name: 'Yarmouk University' },
+        { id: 4, name: 'Princess Sumaya University for Technology' },
+        { id: 5, name: 'The Hashemite University' },
+        { id: 6, name: 'German Jordanian University' },
+        { id: 7, name: 'Al-Balqa Applied University' }
+      ],
+      majors: [
+        { id: 1, universityId: 1, name: 'Computer Science' },
+        { id: 2, universityId: 1, name: 'Software Engineering' },
+        { id: 3, universityId: 2, name: 'Data Science' },
+        { id: 4, universityId: 3, name: 'Information Technology' },
+        { id: 5, universityId: 1, name: 'Artificial Intelligence' },
+        { id: 6, universityId: 2, name: 'Computer Engineering' },
+        { id: 7, universityId: 2, name: 'Business Information Systems' },
+        { id: 8, universityId: 3, name: 'Cybersecurity' },
+        { id: 9, universityId: 4, name: 'Computer Science' },
+        { id: 10, universityId: 4, name: 'Software Engineering' },
+        { id: 11, universityId: 5, name: 'Computer Science' },
+        { id: 12, universityId: 6, name: 'Design and Media Informatics' },
+        { id: 13, universityId: 7, name: 'Computer Science' },
+        { id: 14, universityId: 5, name: 'Cybersecurity' }
+      ],
+      courses: [
+        { id: 1, majorId: 1, code: 'MATH 201', name: 'Calculus II', instructor: 'Dr. Ahmed', semester: 'Spring 2026', examDate: 'May 18', examDays: 5 },
+        { id: 2, majorId: 1, code: 'CS 211', name: 'Data Structures and Algorithms', instructor: 'Dr. Laila', semester: 'Spring 2026', examDate: 'May 23', examDays: 10 },
+        { id: 3, majorId: 1, code: 'CS 342', name: 'Operating Systems', instructor: 'Dr. Bashar', semester: 'Spring 2026', examDate: 'May 28', examDays: 15 },
+        { id: 4, majorId: 2, code: 'SE 312', name: 'Software Architecture', instructor: 'Dr. Omar', semester: 'Spring 2026', examDate: 'June 2', examDays: 20 },
+        { id: 5, majorId: 3, code: 'DATA 240', name: 'Applied Statistics', instructor: 'Dr. Huda', semester: 'Spring 2026', examDate: 'May 25', examDays: 12 },
+        { id: 6, majorId: 4, code: 'CIS 220', name: 'Database Systems', instructor: 'Dr. Khaled', semester: 'Spring 2026', examDate: 'May 29', examDays: 16 },
+        { id: 7, majorId: 5, code: 'AI 301', name: 'Machine Learning', instructor: 'Dr. Noor', semester: 'Spring 2026', examDate: 'May 30', examDays: 17 },
+        { id: 8, majorId: 6, code: 'CPE 321', name: 'Computer Networks', instructor: 'Dr. Sami', semester: 'Spring 2026', examDate: 'June 4', examDays: 22 },
+        { id: 9, majorId: 7, code: 'BIS 230', name: 'Business Analytics', instructor: 'Dr. Reem', semester: 'Spring 2026', examDate: 'June 6', examDays: 24 },
+        { id: 10, majorId: 8, code: 'CYB 310', name: 'Network Security', instructor: 'Dr. Fadi', semester: 'Spring 2026', examDate: 'May 27', examDays: 14 },
+        { id: 11, majorId: 9, code: 'CS 210', name: 'Algorithm Design', instructor: 'Dr. Dana', semester: 'Spring 2026', examDate: 'May 31', examDays: 18 },
+        { id: 12, majorId: 9, code: 'CS 330', name: 'Web Application Development', instructor: 'Dr. Tareq', semester: 'Spring 2026', examDate: 'June 8', examDays: 26 },
+        { id: 13, majorId: 10, code: 'SE 260', name: 'Software Testing', instructor: 'Dr. Majd', semester: 'Spring 2026', examDate: 'June 1', examDays: 19 },
+        { id: 14, majorId: 11, code: 'CS 205', name: 'Discrete Mathematics', instructor: 'Dr. Hanan', semester: 'Spring 2026', examDate: 'May 26', examDays: 13 },
+        { id: 15, majorId: 12, code: 'UX 220', name: 'Interaction Design', instructor: 'Dr. Rania', semester: 'Spring 2026', examDate: 'June 10', examDays: 28 },
+        { id: 16, majorId: 13, code: 'CS 101', name: 'Programming Fundamentals', instructor: 'Dr. Ayman', semester: 'Spring 2026', examDate: 'May 24', examDays: 11 },
+        { id: 17, majorId: 14, code: 'CYB 240', name: 'Ethical Hacking', instructor: 'Dr. Qais', semester: 'Spring 2026', examDate: 'June 3', examDays: 21 },
+        { id: 18, majorId: 1, code: 'MATH 101', name: 'Calculus I', instructor: 'Dr. Dima', semester: 'Spring 2026', examDate: 'May 21', examDays: 8 },
+        { id: 19, majorId: 2, code: 'SE 401', name: 'DevOps and Cloud Systems', instructor: 'Dr. Laith', semester: 'Spring 2026', examDate: 'June 11', examDays: 29 },
+        { id: 20, majorId: 5, code: 'AI 220', name: 'Data Mining', instructor: 'Dr. Saba', semester: 'Spring 2026', examDate: 'June 5', examDays: 23 }
+      ],
+      resources: [
+        { id: 1, courseId: 1, title: 'Midterm Exam 2025 - Solved', type: 'Previous Exam', semester: 'Spring 2025', tags: ['midterm','integration','series'], uploader: 'Rasha Al-Sayed', rating: 4.9, reviews: 38, helpful: 71, verified: true, representative: true, saved: false, userHelpful: false, userRating: 0, text: 'A complete Calculus II midterm with worked solutions. Questions cover integration by parts, trigonometric substitution, limits, and convergence tests. Each answer includes the main reasoning steps and common mistakes.' },
+        { id: 2, courseId: 1, title: 'Integration Techniques - Visual Summary', type: 'Lecture Summary', semester: 'Spring 2026', tags: ['integration','by-parts','trig-sub'], uploader: 'Ahmad Sweidan', rating: 4.8, reviews: 24, helpful: 54, verified: true, representative: false, saved: true, userHelpful: false, userRating: 0, text: 'A visual summary of integration by parts, trigonometric integrals, trigonometric substitution, and partial fractions. Includes a decision guide for selecting the right method.' },
+        { id: 3, courseId: 1, title: 'Infinite Series Quick Reference', type: 'Cheat Sheet', semester: 'Spring 2026', tags: ['series','convergence','taylor'], uploader: 'Hasan Khatib', rating: 4.6, reviews: 17, helpful: 35, verified: true, representative: false, saved: false, userHelpful: false, userRating: 0, text: 'A compact reference for geometric series, p-series, comparison tests, ratio tests, and Taylor series. Designed for final revision before quizzes and exams.' },
+        { id: 4, courseId: 1, title: 'Week 8-10 Student Notes', type: 'Student Note', semester: 'Spring 2026', tags: ['applications','volumes','arc-length'], uploader: 'Zainab Radi', rating: 4.3, reviews: 11, helpful: 20, verified: false, representative: false, saved: false, userHelpful: false, userRating: 0, text: 'Student notes covering applications of integration, volumes of revolution, arc length, and surface area. Examples follow Dr. Ahmed’s class sequence.' },
+        { id: 5, courseId: 2, title: 'AVL Trees and Rotations - Quiz Bank', type: 'Quiz Bank', semester: 'Spring 2026', tags: ['avl','trees','rotations'], uploader: 'Salma Nabulsi', rating: 4.8, reviews: 29, helpful: 62, verified: true, representative: true, saved: false, userHelpful: false, userRating: 0, text: 'A quiz bank for AVL insertion and deletion, single and double rotations, tree height, and balance factors. Each question includes a short answer key.' },
+        { id: 6, courseId: 2, title: 'Graph Algorithms Assignment 3', type: 'Assignment', semester: 'Spring 2026', tags: ['graphs','bfs','dfs'], uploader: 'Mohammad H.', rating: 4.5, reviews: 16, helpful: 31, verified: true, representative: false, saved: false, userHelpful: false, userRating: 0, text: 'Assignment problems on graph representation, BFS, DFS, Dijkstra’s algorithm, and connected components, with annotated solution strategies.' },
+        { id: 7, courseId: 2, title: 'How Dijkstra Powers GPS Routing', type: 'Recommended Video', semester: 'Spring 2026', tags: ['dijkstra','gps','career'], uploader: 'Masdar Curation', rating: 4.7, reviews: 13, helpful: 28, verified: true, representative: false, saved: true, userHelpful: false, userRating: 0, text: 'A curated video explaining how weighted graphs and Dijkstra’s algorithm are adapted for real-world GPS routing and traffic-aware navigation.' },
+        { id: 8, courseId: 2, title: 'Interactive Binary Search Tree Visualizer', type: 'External Resource', semester: 'Spring 2026', tags: ['bst','visualizer','practice'], uploader: 'Masdar Curation', rating: 4.6, reviews: 19, helpful: 36, verified: true, representative: false, saved: false, userHelpful: false, userRating: 0, text: 'An interactive tool for inserting, deleting, and searching nodes in a binary search tree while observing traversals and structural changes.' },
+        { id: 9, courseId: 3, title: 'Process Scheduling Summary', type: 'Lecture Summary', semester: 'Spring 2026', tags: ['scheduling','processes'], uploader: 'Omar K.', rating: 4.5, reviews: 12, helpful: 22, verified: true, representative: false, saved: false, userHelpful: false, userRating: 0, text: 'Summary of FCFS, SJF, round-robin, priority scheduling, waiting time, and turnaround time.' },
+        { id: 10, courseId: 4, title: 'Architecture Patterns Cheat Sheet', type: 'Cheat Sheet', semester: 'Spring 2026', tags: ['mvc','layers','patterns'], uploader: 'Dana M.', rating: 4.4, reviews: 9, helpful: 18, verified: false, representative: false, saved: false, userHelpful: false, userRating: 0, text: 'Quick reference for layered architecture, MVC, microservices, event-driven systems, and their tradeoffs.' }
+      ],
+      roadmaps: {
+        1: [
+          { id: 'm1', title: 'Limits and continuity', description: 'Core definitions, L’Hôpital’s rule, and continuity tests.', difficulty: 'Easy', weight: '20%', done: true },
+          { id: 'm2', title: 'Integration techniques', description: 'By parts, trigonometric integrals, substitutions, and partial fractions.', difficulty: 'Medium', weight: '45%', done: false },
+          { id: 'm3', title: 'Applications of integration', description: 'Areas, volumes, arc length, and physical applications.', difficulty: 'Medium', weight: '20%', done: false },
+          { id: 'm4', title: 'Infinite and Taylor series', description: 'Convergence tests, power series, and approximation.', difficulty: 'Hard', weight: '35%', done: false }
+        ],
+        2: [
+          { id: 'c1', title: 'Complexity and linear structures', description: 'Big-O, arrays, linked lists, stacks, and queues.', difficulty: 'Easy', weight: '20%', done: true },
+          { id: 'c2', title: 'Trees and balancing', description: 'BST operations, AVL rotations, heaps, and priority queues.', difficulty: 'Medium', weight: '40%', done: false },
+          { id: 'c3', title: 'Graphs and shortest paths', description: 'Representations, traversals, Dijkstra, and MST algorithms.', difficulty: 'Hard', weight: '40%', done: false }
+        ]
+      },
+      career: {
+        1: [
+          { icon: 'brain-circuit', title: 'Machine learning optimization', description: 'Derivatives and limits power gradient descent and model training.' },
+          { icon: 'gamepad-2', title: 'Game and physics engines', description: 'Integration turns acceleration into velocity and position over time.' },
+          { icon: 'line-chart', title: 'Financial modeling', description: 'Series and continuous functions support approximation and forecasting.' }
+        ],
+        2: [
+          { icon: 'database', title: 'Database indexing', description: 'Balanced trees enable fast lookups in large relational databases.' },
+          { icon: 'map-pinned', title: 'Navigation and routing', description: 'Graph algorithms choose efficient routes across road networks.' },
+          { icon: 'shield-check', title: 'API infrastructure', description: 'Queues and sliding windows are used in rate limiting systems.' }
+        ]
+      },
+      opportunities: [
+        { id: 1, type: 'Hackathon', title: 'IEEE JUST Hackathon 2026', date: 'April 18, 2026', day: '18', month: 'APR', description: 'Build sustainable education technology with a university team.', rsvp: false },
+        { id: 2, type: 'Competition', title: 'National ICPC Qualifier', date: 'May 2, 2026', day: '02', month: 'MAY', description: 'Form a team and solve algorithmic programming challenges.', rsvp: false },
+        { id: 3, type: 'Workshop', title: 'Orange Backend Academy', date: 'June 12, 2026', day: '12', month: 'JUN', description: 'Hands-on workshop on APIs, PostgreSQL, and cloud systems.', rsvp: false },
+        { id: 4, type: 'Internship', title: 'ProgressSoft Summer Internship', date: 'June 21, 2026', day: '21', month: 'JUN', description: 'A structured internship in software engineering, QA, and financial technology.', rsvp: true },
+        { id: 5, type: 'Meetup', title: 'Amman AI Community Night', date: 'July 4, 2026', day: '04', month: 'JUL', description: 'Student-friendly talks about applied machine learning and responsible AI.', rsvp: false },
+        { id: 6, type: 'Bootcamp', title: 'Zain Cybersecurity Bootcamp', date: 'July 16, 2026', day: '16', month: 'JUL', description: 'Practice threat modeling, web security, network defense, and incident response.', rsvp: false },
+        { id: 7, type: 'Competition', title: 'Jordan Data Challenge', date: 'August 8, 2026', day: '08', month: 'AUG', description: 'Analyze a public dataset and present an evidence-backed recommendation.', rsvp: false },
+        { id: 8, type: 'Workshop', title: 'Design Systems for Developers', date: 'August 20, 2026', day: '20', month: 'AUG', description: 'Build accessible interfaces using reusable tokens and component patterns.', rsvp: true },
+        { id: 9, type: 'Scholarship', title: 'AWS Cloud Practitioner Path', date: 'September 3, 2026', day: '03', month: 'SEP', description: 'A sponsored certification path covering cloud foundations and architecture.', rsvp: false },
+        { id: 10, type: 'Volunteer', title: 'Code for Schools Mentorship', date: 'September 12, 2026', day: '12', month: 'SEP', description: 'Mentor school students through a four-week introductory programming track.', rsvp: false },
+        { id: 11, type: 'Talk', title: 'Careers in Product Engineering', date: 'October 1, 2026', day: '01', month: 'OCT', description: 'Engineers and product designers discuss portfolios, interviews, and first roles.', rsvp: false },
+        { id: 12, type: 'Hackathon', title: 'NASA Space Apps Amman', date: 'October 10, 2026', day: '10', month: 'OCT', description: 'Solve an open science challenge using software, data, design, and teamwork.', rsvp: false }
+      ],
+      requests: [
+        { id: 1, courseId: 1, type: 'Previous Exam', title: 'Second exam 2024 with solutions', requester: 'Lina M.', votes: 18, bounty: 60, voted: false, fulfilled: false },
+        { id: 2, courseId: 1, type: 'Quiz Bank', title: 'Practice questions on infinite series', requester: 'Khaled A.', votes: 12, bounty: 40, voted: false, fulfilled: false },
+        { id: 3, courseId: 2, type: 'Cheat Sheet', title: 'Graph algorithms one-page summary', requester: 'Aya S.', votes: 21, bounty: 80, voted: false, fulfilled: false },
+        { id: 4, courseId: 3, type: 'Lecture Summary', title: 'Deadlocks and synchronization summary', requester: 'Yousef N.', votes: 16, bounty: 40, voted: true, fulfilled: false },
+        { id: 5, courseId: 6, type: 'Previous Exam', title: 'Database final exam from 2025', requester: 'Mariam H.', votes: 29, bounty: 80, voted: false, fulfilled: false },
+        { id: 6, courseId: 7, type: 'Assignment', title: 'Solved gradient descent assignment', requester: 'Samer T.', votes: 24, bounty: 60, voted: false, fulfilled: false },
+        { id: 7, courseId: 8, type: 'Quiz Bank', title: 'Subnetting practice with answer key', requester: 'Raneem J.', votes: 35, bounty: 80, voted: false, fulfilled: false },
+        { id: 8, courseId: 10, type: 'Cheat Sheet', title: 'Common cryptography algorithms comparison', requester: 'Omar D.', votes: 14, bounty: 40, voted: false, fulfilled: false },
+        { id: 9, courseId: 12, type: 'Student Note', title: 'React state management lecture notes', requester: 'Leen A.', votes: 11, bounty: 20, voted: false, fulfilled: false },
+        { id: 10, courseId: 13, type: 'Previous Exam', title: 'Software testing midterm with rubric', requester: 'Basil K.', votes: 19, bounty: 60, voted: false, fulfilled: false },
+        { id: 11, courseId: 15, type: 'External Resource', title: 'Accessible prototyping checklist', requester: 'Farah S.', votes: 17, bounty: 40, voted: false, fulfilled: false },
+        { id: 12, courseId: 17, type: 'Recommended Video', title: 'Beginner-friendly web exploitation lab', requester: 'Nour Q.', votes: 31, bounty: 80, voted: false, fulfilled: false },
+        { id: 13, courseId: 19, type: 'Lecture Summary', title: 'CI/CD pipeline summary and diagram', requester: 'Mahmoud R.', votes: 23, bounty: 60, voted: false, fulfilled: false },
+        { id: 14, courseId: 20, type: 'Quiz Bank', title: 'Association rules practice questions', requester: 'Hala Z.', votes: 13, bounty: 40, voted: false, fulfilled: false }
+      ],
+      contributors: [
+        { id: 2, name: 'Salma Nabulsi', dept: 'Software Engineering', uploads: 18, points: 860 },
+        { id: 3, name: 'Rasha Al-Sayed', dept: 'Computer Science', uploads: 15, points: 740 },
+        { id: 4, name: 'Hasan Khatib', dept: 'Computer Science', uploads: 12, points: 615 },
+        { id: 1, name: 'Student Ahmed', dept: 'Computer Science', uploads: 3, points: 150 },
+        { id: 5, name: 'Zainab Radi', dept: 'Computer Science', uploads: 7, points: 390 },
+        { id: 6, name: 'Lina Masri', dept: 'Data Science', uploads: 11, points: 590 },
+        { id: 7, name: 'Omar Darwish', dept: 'Cybersecurity', uploads: 9, points: 520 },
+        { id: 8, name: 'Leen Abbadi', dept: 'Computer Science', uploads: 8, points: 465 },
+        { id: 9, name: 'Yousef Naser', dept: 'Computer Engineering', uploads: 6, points: 355 },
+        { id: 10, name: 'Raneem Jaber', dept: 'Information Technology', uploads: 13, points: 670 },
+        { id: 11, name: 'Farah Saleh', dept: 'Design and Media Informatics', uploads: 10, points: 548 },
+        { id: 12, name: 'Samer Taha', dept: 'Artificial Intelligence', uploads: 14, points: 705 },
+        { id: 13, name: 'Mariam Haddad', dept: 'Business Information Systems', uploads: 5, points: 310 },
+        { id: 14, name: 'Qais Hamdan', dept: 'Cybersecurity', uploads: 16, points: 815 }
+      ]
+    };
+
+    const courseTopics = {
+      1: ['integration techniques','applications of integration','infinite series','Taylor series'],
+      2: ['complexity analysis','balanced trees','graph traversal','shortest paths'],
+      3: ['process scheduling','synchronization','virtual memory','file systems'],
+      4: ['architecture patterns','quality attributes','microservices','event-driven systems'],
+      5: ['probability distributions','hypothesis testing','regression','confidence intervals'],
+      6: ['relational modeling','SQL queries','normalization','transactions'],
+      7: ['linear regression','gradient descent','classification','model evaluation'],
+      8: ['network layers','subnetting','routing protocols','transport reliability'],
+      9: ['data storytelling','dashboard metrics','forecasting','decision models'],
+      10: ['cryptography','network attacks','access control','incident response'],
+      11: ['divide and conquer','dynamic programming','greedy methods','complexity proofs'],
+      12: ['semantic HTML','responsive CSS','JavaScript state','web APIs'],
+      13: ['unit testing','test design','integration testing','quality automation'],
+      14: ['logic and proofs','sets and relations','combinatorics','graph theory'],
+      15: ['user research','information architecture','interaction patterns','usability testing'],
+      16: ['variables and control flow','functions','arrays','object-oriented basics'],
+      17: ['reconnaissance','web exploitation','privilege escalation','reporting findings'],
+      18: ['limits','derivatives','curve analysis','optimization'],
+      19: ['version control','continuous integration','containers','cloud deployment'],
+      20: ['data preparation','association rules','clustering','feature selection']
+    };
+
+    const resourceBlueprints = [
+      { type: 'Previous Exam', title: (course,topic) => `${course.code} Final Exam 2025 — Fully Solved`, suffix: 'A representative exam with step-by-step solutions, grading notes, and the mistakes students make most often.' },
+      { type: 'Assignment', title: (course,topic) => `${topic.replace(/\b\w/g,c=>c.toUpperCase())} Practice Assignment + Solutions`, suffix: 'A focused practice set arranged from warm-up questions to exam-level applications, followed by an annotated answer key.' },
+      { type: 'Quiz Bank', title: (course,topic) => `${topic.replace(/\b\w/g,c=>c.toUpperCase())} Quiz Bank — 30 Questions`, suffix: 'Thirty mixed multiple-choice and short-answer questions with explanations for every correct answer.' },
+      { type: 'Lecture Summary', title: (course,topic) => `${course.name} Complete Lecture Summary`, suffix: 'A structured lecture companion with definitions, diagrams, worked examples, and a final recap for quick revision.' },
+      { type: 'Cheat Sheet', title: (course,topic) => `${topic.replace(/\b\w/g,c=>c.toUpperCase())} One-Page Cheat Sheet`, suffix: 'A compact reference containing the essential rules, patterns, formulas, and decision steps on one page.' },
+      { type: 'Student Note', title: (course,topic) => `${course.code} Annotated Student Notes — Weeks 5–9`, suffix: 'Clear student notes following the instructor sequence, with highlighted exam hints and questions raised during class.' },
+      { type: 'Recommended Video', title: (course,topic) => `${topic.replace(/\b\w/g,c=>c.toUpperCase())} Explained Visually`, suffix: 'A carefully selected visual explanation that connects the concept to an intuitive example and a practical application.' },
+      { type: 'External Resource', title: (course,topic) => `${course.name} Interactive Practice Lab`, suffix: 'An interactive learning activity where students can change inputs, inspect each step, and check their understanding.' }
+    ];
+
+    const uploaderPool = ['Salma Nabulsi','Rasha Al-Sayed','Hasan Khatib','Lina Masri','Omar Darwish','Leen Abbadi','Raneem Jaber','Farah Saleh','Samer Taha','Mariam Haddad'];
+    let nextDemoResourceId = Math.max(...baseData.resources.map(resource => resource.id)) + 1;
+    baseData.courses.forEach(course => {
+      const topics = courseTopics[course.id] || [course.name,'core concepts','exam practice','real applications'];
+      const existingResources = baseData.resources.filter(resource => resource.courseId === course.id);
+      const existingTypes = new Set(existingResources.map(resource => resource.type));
+      resourceBlueprints.filter(blueprint => !existingTypes.has(blueprint.type)).forEach((blueprint,offset) => {
+        const index = existingResources.length + offset;
+        const topic = topics[index % topics.length];
+        const rating = Number((4.1 + ((course.id * 7 + index * 3) % 9) / 10).toFixed(1));
+        const reviews = 8 + ((course.id * 11 + index * 7) % 54);
+        baseData.resources.push({
+          id: nextDemoResourceId++, courseId: course.id, title: blueprint.title(course,topic), type: blueprint.type,
+          semester: index % 3 === 0 ? 'Fall 2025' : 'Spring 2026', tags: [topic.split(' ')[0],topic.split(' ').slice(-1)[0],index % 2 ? 'practice' : 'exam-ready'],
+          uploader: uploaderPool[(course.id + index) % uploaderPool.length], rating, reviews,
+          helpful: 14 + ((course.id * 13 + index * 9) % 95), verified: index % 5 !== 1,
+          representative: blueprint.type === 'Previous Exam' && index % 2 === 0, saved: (course.id + index) % 11 === 0,
+          userHelpful: false, userRating: 0,
+          text: `${blueprint.suffix} This resource focuses on ${topic} in ${course.code} and follows ${course.instructor}’s course sequence. It includes a short checklist for self-assessment and suggested next steps.`
+        });
+      });
+    });
+
+    baseData.courses.forEach(course => {
+      const topics = courseTopics[course.id] || [course.name,'core concepts','exam practice','real applications'];
+      if (!baseData.roadmaps[course.id]) {
+        baseData.roadmaps[course.id] = topics.map((topic,index) => ({
+          id: `course-${course.id}-${index + 1}`,
+          title: topic.replace(/\b\w/g,c=>c.toUpperCase()),
+          description: `Understand the core ideas, solve guided examples, then practice exam-style questions on ${topic}.`,
+          difficulty: ['Easy','Medium','Medium','Hard'][index], weight: ['15%','25%','30%','30%'][index], done: index === 0
+        }));
+      }
+      if (!baseData.career[course.id]) {
+        baseData.career[course.id] = [
+          { icon: 'briefcase-business', title: `${course.name} in professional work`, description: `See how teams use ${topics[0]} to make better technical and product decisions.` },
+          { icon: 'blocks', title: 'Build portfolio-ready projects', description: `Turn ${topics[1]} into a small demonstrable project for your portfolio or internship interview.` },
+          { icon: 'waypoints', title: 'Connect concepts across courses', description: `Apply ${topics[2]} alongside programming, data, design, and systems knowledge.` }
+        ];
+      }
+    });
+
+    const clone = value => JSON.parse(JSON.stringify(value));
+    let data = clone(baseData);
+    const runtimeFiles = new Map();
+    let state = {
+      view: 'home', universityId: 1, majorId: 1, courseId: 1, selectedCourseIds: [1], coursePickerOpen: false, category: 'All', query: '', sort: 'quality', savedOnly: false,
+      courseTab: 'overview', communityTab: 'requests', uploadStep: 1, selectedFile: null,
+      uploadDraft: { courseId: 1, type: 'Previous Exam', title: '', tags: '', text: '', requestId: null },
+      aiMessages: [], aiCourseId: null, selectedResourceId: null
+    };
+
+    function restoreData() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if (!saved) return;
+        if (Array.isArray(saved.resources)) data.resources = saved.resources;
+        if (Array.isArray(saved.requests)) data.requests = saved.requests;
+        if (Array.isArray(saved.opportunities)) data.opportunities = saved.opportunities;
+        if (Array.isArray(saved.contributors)) data.contributors = saved.contributors;
+        if (saved.roadmaps) data.roadmaps = saved.roadmaps;
+        if (Number(saved.courseId)) state.courseId = Number(saved.courseId);
+        if (Array.isArray(saved.selectedCourseIds) && saved.selectedCourseIds.length) state.selectedCourseIds = saved.selectedCourseIds.map(Number).filter(id => data.courses.some(course => course.id === id));
+      } catch (error) { console.warn('Saved state could not be restored.', error); }
+    }
+
+    function persistData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          resources: data.resources, requests: data.requests, opportunities: data.opportunities,
+          contributors: data.contributors, roadmaps: data.roadmaps, courseId: state.courseId, selectedCourseIds: state.selectedCourseIds
+        }));
+      } catch (error) { console.warn('Progress could not be saved.', error); }
+    }
+
+    const escapeHtml = value => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    const currentCourse = () => data.courses.find(course => course.id === state.courseId) || data.courses[0];
+    const currentMajor = () => data.majors.find(major => major.id === state.majorId) || data.majors[0];
+    const currentUser = () => data.contributors.find(person => person.id === 1);
+    const courseResources = courseId => data.resources.filter(resource => resource.courseId === courseId);
+    const selectedCourses = () => state.selectedCourseIds.map(id => data.courses.find(course => course.id === id)).filter(Boolean);
+    const selectedCourseResources = () => {
+      const selected = new Set(state.selectedCourseIds);
+      return data.resources.filter(resource => selected.has(resource.courseId));
+    };
+    const courseRoadmap = courseId => data.roadmaps[courseId] || [];
+    const courseProgress = courseId => {
+      const nodes = courseRoadmap(courseId);
+      return nodes.length ? Math.round(nodes.filter(node => node.done).length / nodes.length * 100) : 0;
+    };
+    const initials = name => name.split(' ').map(part => part[0]).join('').slice(0,2).toUpperCase();
+    const categoryLabel = value => categories.find(category => category.value === value)?.label || value;
+    const typeIcon = type => categories.find(category => category.value === type)?.icon || 'file-text';
+    const typeAccent = type => ({
+      'Previous Exam':'#6d5dfc','Assignment':'#e26f41','Quiz Bank':'#d59614','Lecture Summary':'#1c9a83',
+      'Cheat Sheet':'#e94f87','Student Note':'#5183e5','Recommended Video':'#d94f4f','External Resource':'#6c7a91'
+    })[type] || '#4f82ff';
+
+    function iconRefresh() { lucide.createIcons(); }
+
+    function updateThemeControl() {
+      const button = document.getElementById('theme-toggle');
+      if (!button) return;
+      const dark = document.documentElement.dataset.theme === 'dark';
+      button.innerHTML = `<i data-lucide="${dark?'sun':'moon'}"></i>`;
+      button.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+      button.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+
+    function toggleTheme() {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem(THEME_KEY,next); } catch (_) {}
+      updateThemeControl(); iconRefresh();
+      notify('success', `${next === 'dark' ? 'Dark' : 'Light'} mode enabled.`);
+    }
+
+    function resetDemoData() {
+      data = clone(baseData);
+      state.universityId = 1; state.majorId = 1; state.courseId = 1; state.selectedCourseIds = [1]; state.coursePickerOpen = false; state.category = 'All';
+      state.query = ''; state.sort = 'quality'; state.savedOnly = false; state.courseTab = 'overview';
+      state.communityTab = 'requests'; state.aiMessages = []; state.aiCourseId = null; resetUpload(false);
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      render(); notify('success','Demo data and interactions were reset.');
+    }
+
+    function updateShell() {
+      const course = currentCourse();
+      const progress = courseProgress(course.id);
+      document.getElementById('sidebar-course').innerHTML = `
+        <span class="current-course-top"><span class="course-code-dark">${course.code}</span><i class="course-arrow" data-lucide="arrow-up-right" style="width:14px;height:14px"></i></span>
+        <span class="current-course-name">${course.name}</span><span class="current-course-meta">${course.instructor} · ${course.semester}</span>
+        <span class="mini-progress"><span style="width:${progress}%"></span></span>`;
+      document.getElementById('top-course').innerHTML = `<strong>${course.code}</strong><span>${course.name}</span>`;
+      const user = currentUser();
+      document.getElementById('user-copy').innerHTML = `<strong>${user.name}</strong><span>${user.points} reputation points</span>`;
+      document.querySelectorAll('[data-nav],[data-mobile-nav]').forEach(link => {
+        const key = link.dataset.nav || link.dataset.mobileNav;
+        const active = key === state.view || (state.view === 'course' && key === 'home');
+        link.classList.toggle('active', active);
+        active ? link.setAttribute('aria-current','page') : link.removeAttribute('aria-current');
+      });
+      updateThemeControl();
+    }
+
+    function navigate(view) {
+      if (view === 'courses') {
+        openCourseCatalog();
+        return;
+      }
+      const allowed = ['home','explore','course','contribute','community'];
+      state.view = allowed.includes(view) ? view : 'home';
+      closePanels();
+      render();
+      history.replaceState(null,'',`#/${state.view}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function render() {
+      updateShell();
+      const app = document.getElementById('app');
+      app.className = 'main page-enter';
+      if (state.view === 'home') renderHome();
+      else if (state.view === 'explore') renderExplore();
+      else if (state.view === 'course') renderCourse();
+      else if (state.view === 'contribute') renderContribute();
+      else renderCommunity();
+      iconRefresh();
+    }
+
+    function runGlobalSearch(value) {
+      const query = value.trim();
+      if (!query) return;
+      state.query = query;
+      state.category = 'All';
+      navigate('explore');
+    }
+
+    function renderHome() {
+      const app = document.getElementById('app');
+      const course = currentCourse();
+      const resources = courseResources(course.id).sort((a,b) => b.rating - a.rating).slice(0,3);
+      const roadmap = courseRoadmap(course.id);
+      const progress = courseProgress(course.id);
+      const nextNode = roadmap.find(node => !node.done) || roadmap[roadmap.length - 1];
+      const verifiedCount = data.resources.filter(resource => resource.verified).length;
+      const helpfulCount = data.resources.reduce((sum,resource) => sum + resource.helpful,0);
+      app.innerHTML = `
+        <section class="home-hero">
+          <div class="hero-copy">
+            <div class="hero-kicker"><span></span>Welcome back, Ahmed</div>
+            <h1>Find the right material.<br><em>Learn with confidence.</em></h1>
+            <p class="hero-desc">Trusted course resources, community quality signals, and an AI tutor that understands what you are studying.</p>
+            <div class="hero-search"><input id="home-search" placeholder="Try “integration practice exam”" aria-label="Search resources" onkeydown="if(event.key==='Enter')runGlobalSearch(this.value)"><button class="btn btn-primary" onclick="runGlobalSearch(document.getElementById('home-search').value)"><i data-lucide="search"></i>Search</button></div>
+          </div>
+          <aside class="exam-card">
+            <div class="exam-card-top"><span class="exam-label">Next exam</span><span class="exam-days">${course.examDays} days</span></div>
+            <h3>${course.code} · ${course.name}</h3><p>${course.examDate} · ${course.instructor}</p>
+            <div class="exam-progress-label"><span>Course readiness</span><strong>${progress}%</strong></div><div class="exam-progress"><span style="width:${progress}%"></span></div>
+            <button class="btn" onclick="navigate('course')">Continue learning <i data-lucide="arrow-right"></i></button>
+          </aside>
+        </section>
+
+        <section class="platform-stats" aria-label="Platform demo data">
+          <article class="card stat-card"><span class="stat-icon"><i data-lucide="library"></i></span><span><strong>${data.resources.length}</strong><span>study resources</span></span></article>
+          <article class="card stat-card"><span class="stat-icon"><i data-lucide="book-open"></i></span><span><strong>${data.courses.length}</strong><span>active courses</span></span></article>
+          <article class="card stat-card"><span class="stat-icon"><i data-lucide="badge-check"></i></span><span><strong>${Math.round(verifiedCount/data.resources.length*100)}%</strong><span>community verified</span></span></article>
+          <article class="card stat-card"><span class="stat-icon"><i data-lucide="thumbs-up"></i></span><span><strong>${helpfulCount.toLocaleString()}</strong><span>helpful votes</span></span></article>
+        </section>
+
+        <div class="section-head"><div><h2>Pick up where you left off</h2><p>One clear next step for your active course.</p></div></div>
+        <section class="home-grid">
+          <article class="card continue-card">
+            <span class="course-symbol"><i data-lucide="book-open-check"></i></span>
+            <div><span class="badge badge-blue">${course.code}</span><h3 style="margin-top:7px">${course.name}</h3><p>${course.instructor} · ${course.semester}</p><div class="continue-meta"><span class="progress-inline"><span style="width:${progress}%"></span></span><span class="progress-value">${progress}% complete</span></div></div>
+            <button class="btn btn-primary btn-small" onclick="navigate('course')">Open course <i data-lucide="arrow-right"></i></button>
+          </article>
+          <article class="card next-step-card"><div class="row"><span class="next-icon"><i data-lucide="target"></i></span><div><small>Your next milestone</small><h3>${escapeHtml(nextNode?.title || 'Explore course resources')}</h3><p>${escapeHtml(nextNode?.description || 'Start with a trusted resource from this course.')}</p></div></div></article>
+        </section>
+
+        <div class="section-head"><div><h2>Trusted for your next study session</h2><p>Quality-ranked resources from ${course.code}.</p></div><button class="section-link" onclick="navigate('explore')">See all <i data-lucide="arrow-right"></i></button></div>
+        <section class="resource-grid">${resources.map(resourceCard).join('')}</section>
+
+        <section class="home-grid">
+          <div>
+            <div class="section-head"><div><h2>Your roadmap</h2><p>Progress through the course in the right order.</p></div><button class="section-link" onclick="state.courseTab='roadmap';navigate('course')">Full roadmap <i data-lucide="arrow-right"></i></button></div>
+            <article class="card roadmap-card">${roadmap.slice(0,4).map((node,index) => `<div class="roadmap-mini-row"><span class="roadmap-mini-dot ${node.done?'done':''}">${node.done?'<i data-lucide="check" style="width:12px;height:12px"></i>':index+1}</span><span><strong>${escapeHtml(node.title)}</strong><span>${node.difficulty} · ${node.weight} of exam</span></span><span class="badge ${node.done?'badge-green':'badge-gray'}">${node.done?'Done':'Next'}</span></div>`).join('')}</article>
+          </div>
+          <div>
+            <div class="section-head"><div><h2>Relevant opportunities</h2><p>Move from theory to real experience.</p></div><button class="section-link" onclick="state.courseTab='career';navigate('course')">View all <i data-lucide="arrow-right"></i></button></div>
+            <div class="opportunity-list">${data.opportunities.slice(0,3).map(opportunityRow).join('')}</div>
+          </div>
+        </section>`;
+    }
+
+    function resourceCard(resource) {
+      const course = data.courses.find(item => item.id === resource.courseId);
+      return `<article class="card resource-card" style="--resource-accent:${typeAccent(resource.type)}">
+        <div class="resource-card-top"><span class="type-chip"><span class="type-chip-icon"><i data-lucide="${typeIcon(resource.type)}"></i></span>${resource.type}</span><span class="resource-actions-top">${resource.verified?'<span class="verified"><i data-lucide="badge-check"></i>Verified</span>':'<span class="badge badge-gray">In review</span>'}<button class="bookmark-button ${resource.saved?'saved':''}" onclick="toggleSaved(${resource.id},event)" aria-label="${resource.saved?'Remove from saved resources':'Save resource'}" aria-pressed="${resource.saved}"><i data-lucide="bookmark"></i></button></span></div>
+        <h3>${escapeHtml(resource.title)}</h3><p class="resource-sub">${course.code} · ${resource.semester} · ${course.instructor}</p>
+        <div class="resource-author"><span class="resource-avatar">${initials(resource.uploader)}</span><span>Shared by ${escapeHtml(resource.uploader)}</span></div>
+        <div class="tag-row">${resource.tags.slice(0,3).map(tag => `<span class="mini-tag">#${escapeHtml(tag)}</span>`).join('')}</div>
+        <div class="resource-card-footer"><span class="quality-score"><span><strong>${resource.reviews?resource.rating.toFixed(1):'New'}</strong><br><span>${resource.reviews} ratings · ${resource.helpful} helpful</span></span><span class="quality-bar"><i style="width:${resource.rating/5*100}%"></i></span></span><span class="resource-footer-actions"><button class="download-link" onclick="downloadResource(${resource.id})"><i data-lucide="download"></i>Download</button><button class="preview-link" onclick="openResource(${resource.id})">Preview <i data-lucide="arrow-up-right"></i></button></span></div>
+      </article>`;
+    }
+
+    function toggleSaved(id,event) {
+      event?.stopPropagation();
+      const resource = data.resources.find(item => item.id === id);
+      if (!resource) return;
+      resource.saved = !resource.saved; persistData();
+      notify(resource.saved?'success':'info',resource.saved?'Saved to your library.':'Removed from saved resources.');
+      if (state.view === 'explore') renderExploreResults(); else render();
+    }
+
+    function downloadResource(id) {
+      const resource = data.resources.find(item => item.id === id);
+      if (!resource) return;
+      const course = data.courses.find(item => item.id === resource.courseId);
+      const uploadedFile = runtimeFiles.get(id);
+      const content = [
+        'MASDAR DEMO RESOURCE', '====================', '',
+        `Title: ${resource.title}`, `Course: ${course.code} · ${course.name}`, `Instructor: ${course.instructor}`,
+        `Type: ${resource.type}`, `Semester: ${resource.semester}`, `Shared by: ${resource.uploader}`,
+        `Community rating: ${resource.reviews ? `${resource.rating.toFixed(1)}/5 from ${resource.reviews} ratings` : 'Not rated yet'}`,
+        `Helpful votes: ${resource.helpful}`, `Tags: ${resource.tags.join(', ')}`, '', 'RESOURCE CONTENT', '----------------', resource.text, '',
+        'This downloadable text file is generated for the interactive prototype. In the production platform, this action downloads the original uploaded PDF or DOCX file.'
+      ].join('\n');
+      const blob = uploadedFile || new Blob([content],{type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeName = `${course.code}-${resource.title}`.replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase();
+      link.href=url; link.download=uploadedFile?.name || `${safeName || 'masdar-resource'}.txt`; document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      notify('success',uploadedFile?'Original uploaded file download started.':'Demo resource download started.');
+    }
+
+    function opportunityRow(opportunity) {
+      return `<article class="opportunity-row"><span class="opp-date-box"><strong>${opportunity.day}</strong><span>${opportunity.month}</span></span><div><h4>${escapeHtml(opportunity.title)}</h4><p>${opportunity.type} · ${opportunity.rsvp?'Registered':'Registration open'}</p></div></article>`;
+    }
+
+    function renderExplore() {
+      const app = document.getElementById('app');
+      const majors = data.majors.filter(major => major.universityId === state.universityId);
+      if (!majors.some(major => major.id === state.majorId)) state.majorId = majors[0]?.id || 1;
+      const courses = data.courses.filter(course => course.majorId === state.majorId);
+      if (!state.selectedCourseIds.length) state.selectedCourseIds = [courses[0]?.id || 1];
+      if (!state.selectedCourseIds.includes(state.courseId)) state.courseId = state.selectedCourseIds[0];
+      const pickedCourses = selectedCourses();
+      const pickedHere = courses.filter(course => state.selectedCourseIds.includes(course.id));
+      app.innerHTML = `
+        <header class="page-head"><div><div class="eyebrow">Browse → Find → Learn</div><h1>Find course resources</h1><p>Start with your academic context, then compare resources using clear community quality signals.</p></div><button class="btn btn-primary" onclick="navigate('contribute')"><i data-lucide="upload-cloud"></i>Share a resource</button></header>
+        <section class="card context-panel">
+          <div class="context-title"><span><i data-lucide="sliders-horizontal"></i></span>What are you studying? <small>Select one or more courses</small></div>
+          <div class="context-grid">
+            <div class="field"><label for="filter-university">University</label><select id="filter-university" onchange="selectUniversity(this.value)">${data.universities.map(university => `<option value="${university.id}" ${university.id===state.universityId?'selected':''}>${university.name}</option>`).join('')}</select></div>
+            <div class="field"><label for="filter-major">Major</label><select id="filter-major" onchange="selectMajor(this.value)">${majors.map(major => `<option value="${major.id}" ${major.id===state.majorId?'selected':''}>${major.name}</option>`).join('')}</select></div>
+            <div class="field"><label>Courses</label><div class="course-multi ${state.coursePickerOpen?'open':''}" id="course-multi"><button class="multi-select-trigger" type="button" onclick="toggleCoursePicker(event)" aria-haspopup="listbox" aria-expanded="${state.coursePickerOpen}"><span>${pickedHere.length?`${pickedHere.length} selected in this major`:'Choose courses to add'}</span><i data-lucide="chevron-down"></i></button><div class="multi-select-menu" role="listbox" aria-label="Select courses" aria-multiselectable="true">${courses.map(course=>`<button type="button" class="multi-course-option ${state.selectedCourseIds.includes(course.id)?'selected':''}" onclick="toggleCourseSelection(${course.id},event)" role="option" aria-selected="${state.selectedCourseIds.includes(course.id)}"><span class="multi-check"><i data-lucide="check"></i></span><span><strong>${course.code}</strong><small>${course.name}</small></span></button>`).join('')}</div></div></div>
+          </div>
+          <div class="selected-courses-bar"><span class="selected-courses-label">Selected courses</span><div class="selected-course-chips">${pickedCourses.map(course=>`<span class="selected-course-chip ${course.id===state.courseId?'active':''}"><button type="button" onclick="setActiveCourse(${course.id})" title="Use ${course.code} as the active course">${course.code}</button><button type="button" class="remove-course" onclick="removeSelectedCourse(${course.id},event)" ${pickedCourses.length===1?'disabled':''} aria-label="Remove ${course.code}"><i data-lucide="x"></i></button></span>`).join('')}</div><span class="selected-courses-hint">${pickedCourses.length} selected · click a course to make it active for the AI tutor</span></div>
+        </section>
+        <div class="field mobile-category-field"><label for="mobile-category">Resource type</label><select id="mobile-category" onchange="setCategory(this.value)">${categories.map(category => `<option value="${category.value}" ${category.value===state.category?'selected':''}>${category.label}</option>`).join('')}</select></div>
+        <div class="category-strip" role="group" aria-label="Resource category">${categories.map(category => `<button class="category-chip ${category.value===state.category?'active':''}" onclick="setCategory('${category.value}')"><i data-lucide="${category.icon}"></i>${category.label}</button>`).join('')}</div>
+        <div class="results-toolbar"><div class="result-search"><i data-lucide="search"></i><input type="search" id="resource-search" value="${escapeHtml(state.query)}" placeholder="Search across ${pickedCourses.length} selected ${pickedCourses.length===1?'course':'courses'}" aria-label="Search selected course resources" oninput="setResourceQuery(this.value)"></div><button class="btn btn-secondary saved-filter ${state.savedOnly?'active':''}" onclick="toggleSavedFilter()" aria-pressed="${state.savedOnly}"><i data-lucide="bookmark"></i>Saved</button><select class="sort-select" aria-label="Sort resources" onchange="setResourceSort(this.value)"><option value="quality" ${state.sort==='quality'?'selected':''}>Highest quality</option><option value="helpful" ${state.sort==='helpful'?'selected':''}>Most helpful</option><option value="recent" ${state.sort==='recent'?'selected':''}>Most recent</option></select></div>
+        <div id="explore-results"></div>`;
+      renderExploreResults();
+    }
+
+    function renderExploreResults() {
+      const target = document.getElementById('explore-results');
+      if (!target) return;
+      const query = state.query.trim().toLowerCase();
+      let resources = selectedCourseResources().filter(resource => {
+        const categoryMatch = state.category === 'All' || resource.type === state.category;
+        const text = [resource.title,resource.type,resource.uploader,...resource.tags].join(' ').toLowerCase();
+        return categoryMatch && (!state.savedOnly || resource.saved) && (!query || text.includes(query));
+      });
+      if (state.sort === 'quality') resources.sort((a,b) => b.rating - a.rating);
+      else if (state.sort === 'helpful') resources.sort((a,b) => b.helpful - a.helpful);
+      else resources.sort((a,b) => b.id - a.id);
+      const selected = selectedCourses();
+      const scope = selected.length === 1 ? selected[0].code : `${selected.length} selected courses`;
+      target.innerHTML = `<p class="results-meta">${resources.length} ${resources.length===1?'resource':'resources'} across ${scope}${state.category!=='All'?` · ${categoryLabel(state.category)}`:''}${state.savedOnly?' · Saved only':''}</p>${resources.length?`<section class="resource-grid">${resources.map(resourceCard).join('')}</section>`:`<div class="empty-state"><span class="empty-icon"><i data-lucide="${state.savedOnly?'bookmark-x':'search-x'}"></i></span><h3>${state.savedOnly?'No saved resources here':'No matching resources'}</h3><p>${state.savedOnly?'Save useful material and it will appear in this view.':'Try another keyword or category. You can also request what you need from the community.'}</p><button class="btn btn-primary" onclick="${state.savedOnly?'toggleSavedFilter()':'openRequestModal()'}">${state.savedOnly?'Show all resources':'Request a resource'}</button></div>`}`;
+      iconRefresh();
+    }
+
+    function selectUniversity(value) {
+      state.universityId = Number(value);
+      state.majorId = data.majors.find(major => major.universityId === state.universityId)?.id || 1;
+      state.coursePickerOpen = false; state.category = 'All'; state.query = ''; renderExplore(); updateShell();
+    }
+    function selectMajor(value) { state.majorId = Number(value); state.coursePickerOpen=false; state.category='All'; state.query=''; renderExplore(); updateShell(); }
+    function toggleCoursePicker(event) { event?.stopPropagation(); state.coursePickerOpen=!state.coursePickerOpen; const picker=document.getElementById('course-multi'); picker?.classList.toggle('open',state.coursePickerOpen); picker?.querySelector('.multi-select-trigger')?.setAttribute('aria-expanded',state.coursePickerOpen); }
+    function toggleCourseSelection(id,event) {
+      event?.stopPropagation();
+      const selected = state.selectedCourseIds.includes(id);
+      if (selected && state.selectedCourseIds.length === 1) return notify('info','Keep at least one course selected.');
+      state.selectedCourseIds = selected ? state.selectedCourseIds.filter(courseId=>courseId!==id) : [...state.selectedCourseIds,id];
+      if (!state.selectedCourseIds.includes(state.courseId)) state.courseId=state.selectedCourseIds[0];
+      state.uploadDraft.courseId=state.courseId; state.coursePickerOpen=true; persistData(); renderExplore(); updateShell();
+    }
+    function removeSelectedCourse(id,event) { event?.stopPropagation(); toggleCourseSelection(id,event); }
+    function setActiveCourse(id) { if(!state.selectedCourseIds.includes(id))return; state.courseId=id; state.uploadDraft.courseId=id; state.coursePickerOpen=false; persistData(); renderExplore(); updateShell(); notify('success',`${currentCourse().code} is now active for the course workspace and AI tutor.`); }
+    function setCategory(value) { state.category=value; renderExplore(); }
+    function setResourceQuery(value) { state.query=value; renderExploreResults(); }
+    function setResourceSort(value) { state.sort=value; renderExploreResults(); }
+    function toggleSavedFilter() { state.savedOnly=!state.savedOnly; renderExplore(); }
+
+    function renderCourse() {
+      const app = document.getElementById('app');
+      const course = currentCourse();
+      const progress = courseProgress(course.id);
+      app.innerHTML = `
+        <section class="course-hero"><div class="course-hero-grid"><div><div class="course-breadcrumb"><button onclick="navigate('home')">Home</button><i data-lucide="chevron-right" style="width:11px;height:11px"></i><span>${course.code}</span></div><span class="badge" style="background:rgba(93,145,255,.18);color:#9fbaff">${course.semester}</span><h1 style="margin-top:10px">${course.name}</h1><p>${course.code} · ${course.instructor} · ${courseResources(course.id).length} trusted resources</p><div class="course-hero-actions"><button class="btn btn-primary" onclick="openTutor()"><i data-lucide="sparkles"></i>Ask course tutor</button><button class="btn btn-secondary" onclick="navigate('explore')"><i data-lucide="library"></i>Browse materials</button></div></div><div class="course-progress-ring" style="--progress:${progress}"><div class="ring-copy"><strong>${progress}%</strong><span>complete</span></div></div></div></section>
+        <nav class="course-tabs" aria-label="Course workspace">${[['overview','layout-dashboard','Overview'],['materials','library','Materials'],['roadmap','milestone','Roadmap'],['career','briefcase-business','Career relevance']].map(tab => `<button class="course-tab ${state.courseTab===tab[0]?'active':''}" onclick="setCourseTab('${tab[0]}')"><i data-lucide="${tab[1]}"></i>${tab[2]}</button>`).join('')}</nav>
+        <div id="course-tab-content"></div>`;
+      renderCourseTab();
+    }
+
+    function setCourseTab(tab) { state.courseTab=tab; renderCourse(); }
+
+    function renderCourseTab() {
+      const target = document.getElementById('course-tab-content');
+      const course = currentCourse();
+      const resources = courseResources(course.id).sort((a,b)=>b.rating-a.rating);
+      const roadmap = courseRoadmap(course.id);
+      if (state.courseTab === 'overview') {
+        const next = roadmap.find(node => !node.done);
+        target.innerHTML = `<section class="overview-grid"><article class="card overview-panel"><h2>Focus for your next exam</h2><p>Prioritized using exam weight and your roadmap progress.</p><div class="focus-list">${roadmap.filter(node=>!node.done).slice(0,3).map((node,index)=>`<div class="focus-item"><span class="focus-number">${index+1}</span><span><strong>${escapeHtml(node.title)}</strong><span>${node.difficulty} · ${node.weight} exam weight</span></span></div>`).join('') || '<p>You completed the current roadmap.</p>'}</div>${next?`<button class="btn btn-soft" style="margin-top:16px" onclick="state.courseTab='roadmap';renderCourse()">Open roadmap <i data-lucide="arrow-right"></i></button>`:''}</article><article class="card ai-course-card"><span class="ai-course-icon"><i data-lucide="sparkles"></i></span><h3>Ask questions in course context</h3><p>The tutor retrieves answers from uploaded ${course.code} materials and shows the source it used.</p><button class="btn" onclick="openTutor()">Start a conversation</button></article></section><div class="section-head"><div><h2>Top resources for this course</h2><p>Community-ranked and verified.</p></div><button class="section-link" onclick="state.courseTab='materials';renderCourse()">View all <i data-lucide="arrow-right"></i></button></div><section class="resource-grid">${resources.slice(0,3).map(resourceCard).join('')}</section>`;
+      } else if (state.courseTab === 'materials') {
+        target.innerHTML = `<div class="section-head" style="margin-top:0"><div><h2>${resources.length} course resources</h2><p>Compare quality before you spend time reading.</p></div><button class="btn btn-primary btn-small" onclick="navigate('contribute')"><i data-lucide="upload-cloud"></i>Add resource</button></div>${resources.length?`<section class="resource-grid">${resources.map(resourceCard).join('')}</section>`:`<div class="empty-state"><span class="empty-icon"><i data-lucide="library"></i></span><h3>No resources yet</h3><p>Be the first to contribute to this course.</p><button class="btn btn-primary" onclick="navigate('contribute')">Upload resource</button></div>`}`;
+      } else if (state.courseTab === 'roadmap') {
+        target.innerHTML = `<div class="section-head" style="margin-top:0"><div><h2>Smart course roadmap</h2><p>A guided path shaped by difficulty and exam importance.</p></div></div>${roadmap.length?`<section class="roadmap-full">${roadmap.map((node,index)=>`<article class="card roadmap-node"><span class="node-status ${node.done?'done':''}"><i data-lucide="${node.done?'check':'circle'}"></i></span><div class="node-content"><h3>${index+1}. ${escapeHtml(node.title)}</h3><p>${escapeHtml(node.description)}</p><div class="node-badges"><span class="badge ${node.difficulty==='Hard'?'badge-amber':'badge-blue'}">${node.difficulty}</span><span class="badge badge-gray">${node.weight} exam weight</span></div></div><button class="btn ${node.done?'btn-secondary':'btn-soft'} btn-small" onclick="toggleRoadmap('${node.id}')">${node.done?'Mark incomplete':'Mark complete'}</button></article>`).join('')}</section>`:`<div class="empty-state"><span class="empty-icon"><i data-lucide="milestone"></i></span><h3>Roadmap coming soon</h3><p>The community is mapping this course.</p></div>`}`;
+      } else {
+        const relevance = data.career[course.id] || [];
+        target.innerHTML = `<div class="section-head" style="margin-top:0"><div><h2>Why this course matters</h2><p>Connect academic concepts to real systems and career paths.</p></div></div>${relevance.length?`<section class="career-grid">${relevance.map(item=>`<article class="card career-card"><span class="career-icon"><i data-lucide="${item.icon}"></i></span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p></article>`).join('')}</section>`:`<div class="empty-state"><span class="empty-icon"><i data-lucide="briefcase-business"></i></span><h3>Career mapping coming soon</h3><p>We are connecting this course to practical applications.</p></div>`}<div class="section-head"><div><h2>Opportunities for students</h2><p>Apply what you learn beyond the classroom.</p></div></div><section class="opportunity-grid">${data.opportunities.map(opportunityCard).join('')}</section>`;
+      }
+      iconRefresh();
+    }
+
+    function toggleRoadmap(nodeId) {
+      const node = courseRoadmap(state.courseId).find(item => item.id === nodeId);
+      if (!node) return;
+      node.done = !node.done; persistData(); notify('success', node.done ? 'Milestone completed.' : 'Milestone marked incomplete.'); renderCourse(); updateShell();
+    }
+
+    function opportunityCard(opportunity) {
+      return `<article class="card opportunity-card"><div class="opportunity-card-top"><span class="badge badge-blue">${opportunity.type}</span><time>${opportunity.date}</time></div><h3>${escapeHtml(opportunity.title)}</h3><p>${escapeHtml(opportunity.description)}</p><button class="btn ${opportunity.rsvp?'btn-secondary':'btn-soft'} btn-small" onclick="toggleRsvp(${opportunity.id})">${opportunity.rsvp?'<i data-lucide="check"></i>Registered':'Register interest'}</button></article>`;
+    }
+    function toggleRsvp(id) { const opportunity=data.opportunities.find(item=>item.id===id); if(!opportunity)return; opportunity.rsvp=!opportunity.rsvp; persistData(); notify(opportunity.rsvp?'success':'info',opportunity.rsvp?'Registration saved.':'Registration removed.'); renderCourse(); }
+
+    function renderContribute() {
+      const app = document.getElementById('app');
+      app.innerHTML = `<header class="page-head"><div><div class="eyebrow">Community contribution</div><h1>Share a study resource</h1><p>Three short steps. Masdar handles quality review and AI indexing after you publish.</p></div></header><div class="wizard-shell"><div class="stepper">${[['File',1],['Details',2],['Review',3]].map(([label,step])=>`<div class="step ${state.uploadStep===step?'active':state.uploadStep>step?'done':''}"><span class="step-number">${state.uploadStep>step?'<i data-lucide="check" style="width:13px;height:13px"></i>':step}</span><span>${label}</span></div>`).join('')}</div><section class="card wizard-card" id="wizard-card"></section></div>`;
+      renderUploadStep();
+    }
+
+    function renderUploadStep() {
+      const card = document.getElementById('wizard-card');
+      if (!card) return;
+      if (state.uploadStep === 1) {
+        card.innerHTML = `<div class="wizard-header"><h2>Choose your file</h2><p>PDF and DOCX up to 10 MB. You can review every detail before publishing.</p></div><div class="wizard-body">${state.selectedFile?`<div class="selected-file"><span class="file-icon"><i data-lucide="file-check-2"></i></span><span class="file-meta"><strong>${escapeHtml(state.selectedFile.name)}</strong><span>${state.selectedFile.sizeLabel} · Ready to continue</span></span><button class="icon-button" onclick="removeUploadFile()" aria-label="Remove selected file"><i data-lucide="x"></i></button></div>`:`<input class="sr-only" id="upload-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="handleUploadFile(this.files[0])"><div class="dropzone" id="dropzone" role="button" tabindex="0" onclick="document.getElementById('upload-file').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('upload-file').click()}" ondragover="setDropState(event,true)" ondragleave="setDropState(event,false)" ondrop="handleUploadDrop(event)"><div><span class="drop-icon"><i data-lucide="upload-cloud"></i></span><h3>Drop a file here</h3><p>or select it from your device</p><button class="btn btn-soft" type="button">Choose file</button></div></div>`}</div><div class="wizard-footer"><span></span><button class="btn btn-primary" ${state.selectedFile?'':'disabled'} onclick="goUploadStep(2)">Continue <i data-lucide="arrow-right"></i></button></div>`;
+      } else if (state.uploadStep === 2) {
+        const request = data.requests.find(item => item.id === state.uploadDraft.requestId);
+        card.innerHTML = `<div class="wizard-header"><h2>Describe the resource</h2><p>Accurate context helps students find it and helps the AI tutor use it correctly.</p></div><div class="wizard-body">${request?`<div class="request-match"><span><strong>Fulfilling a community request</strong><span>${escapeHtml(request.title)} · +${request.bounty} points</span></span><span class="badge badge-amber">${request.bounty} pts</span></div>`:''}<div class="form-grid"><div class="field full"><label for="upload-title">Resource title</label><input id="upload-title" maxlength="120" value="${escapeHtml(state.uploadDraft.title)}" placeholder="e.g. Calculus II Midterm 2025 - Solved" oninput="state.uploadDraft.title=this.value"></div><div class="field"><label for="upload-course">Course</label><select id="upload-course" onchange="state.uploadDraft.courseId=Number(this.value)">${data.courses.map(course=>`<option value="${course.id}" ${course.id===state.uploadDraft.courseId?'selected':''}>${course.code} · ${course.name}</option>`).join('')}</select></div><div class="field"><label for="upload-type">Resource type</label><select id="upload-type" onchange="state.uploadDraft.type=this.value">${categories.slice(1).map(category=>`<option value="${category.value}" ${category.value===state.uploadDraft.type?'selected':''}>${category.label}</option>`).join('')}</select></div><div class="field full"><label for="upload-tags">Topic tags</label><input id="upload-tags" value="${escapeHtml(state.uploadDraft.tags)}" placeholder="integration, midterm, solved" oninput="state.uploadDraft.tags=this.value"></div></div></div><div class="wizard-footer"><button class="btn btn-secondary" onclick="goUploadStep(1)"><i data-lucide="arrow-left"></i>Back</button><button class="btn btn-primary" onclick="validateUploadDetails()">Review <i data-lucide="arrow-right"></i></button></div>`;
+      } else if (state.uploadStep === 3) {
+        const course=data.courses.find(item=>item.id===state.uploadDraft.courseId);
+        card.innerHTML = `<div class="wizard-header"><h2>Review before publishing</h2><p>Confirm the information below. The resource enters community review after publishing.</p></div><div class="wizard-body"><div class="review-summary"><div class="summary-row"><span>File</span><strong>${escapeHtml(state.selectedFile?.name)}</strong></div><div class="summary-row"><span>Title</span><strong>${escapeHtml(state.uploadDraft.title)}</strong></div><div class="summary-row"><span>Course</span><strong>${course.code} · ${course.name}</strong></div><div class="summary-row"><span>Type</span><strong>${categoryLabel(state.uploadDraft.type)}</strong></div><div class="summary-row"><span>Tags</span><strong>${escapeHtml(state.uploadDraft.tags || 'No tags')}</strong></div></div><div class="field" style="margin-top:18px"><label for="upload-text">Optional text for the AI tutor</label><textarea id="upload-text" placeholder="Paste key facts or a short summary to improve course-aware answers." oninput="state.uploadDraft.text=this.value">${escapeHtml(state.uploadDraft.text)}</textarea></div><div class="consent-row"><input type="checkbox" id="upload-consent"><label for="upload-consent">I confirm that this resource is relevant to the selected course and that I have permission to share it with the student community.</label></div></div><div class="wizard-footer"><button class="btn btn-secondary" onclick="goUploadStep(2)"><i data-lucide="arrow-left"></i>Back</button><button class="btn btn-primary" onclick="publishResource()"><i data-lucide="upload-cloud"></i>Publish resource</button></div>`;
+      } else if (state.uploadStep === 4) {
+        card.innerHTML = `<div class="publish-progress"><div class="progress-spinner"></div><h3>Preparing your resource</h3><p>Saving metadata, creating searchable sections, and adding it to community review.</p></div>`;
+      } else {
+        card.innerHTML = `<div class="success-state"><span class="success-icon"><i data-lucide="check"></i></span><h2>Your resource is live</h2><p>Students can now discover it. It will earn a verified badge after the community quality threshold is reached.</p><span class="points-earned"><i data-lucide="award" style="width:14px;height:14px"></i>+15 reputation points</span><div><button class="btn btn-primary" onclick="viewPublishedResource()">View resource</button><button class="btn btn-secondary" style="margin-left:7px" onclick="resetUpload()">Share another</button></div></div>`;
+      }
+      iconRefresh();
+    }
+
+    function setDropState(event,active) { event.preventDefault(); document.getElementById('dropzone')?.classList.toggle('dragging',active); }
+    function handleUploadDrop(event) { setDropState(event,false); handleUploadFile(event.dataTransfer?.files?.[0]); }
+    function handleUploadFile(file) {
+      if (!file) return;
+      const extension=file.name.split('.').pop()?.toLowerCase();
+      if (!['pdf','docx'].includes(extension)) return notify('error','Please select a PDF or DOCX file.');
+      if (file.size>10*1024*1024) return notify('error','The selected file is larger than 10 MB.');
+      const sizeLabel=file.size>=1024*1024?`${(file.size/1024/1024).toFixed(1)} MB`:`${Math.max(1,Math.ceil(file.size/1024))} KB`;
+      state.selectedFile={name:file.name,size:file.size,sizeLabel,file}; renderUploadStep();
+    }
+    function removeUploadFile() { state.selectedFile=null; renderUploadStep(); }
+    function goUploadStep(step) { state.uploadStep=step; renderContribute(); }
+    function validateUploadDetails() { if(!state.uploadDraft.title.trim()) return notify('error','Add a clear resource title.'); goUploadStep(3); }
+    function publishResource() {
+      if (!document.getElementById('upload-consent')?.checked) return notify('error','Please confirm that you can share this resource.');
+      state.uploadStep=4; renderUploadStep();
+      setTimeout(()=>{
+        const id=Math.max(...data.resources.map(resource=>resource.id))+1;
+        const resource={ id, courseId:state.uploadDraft.courseId, title:state.uploadDraft.title.trim(), type:state.uploadDraft.type, semester:'Spring 2026', tags:state.uploadDraft.tags.split(',').map(tag=>tag.trim()).filter(Boolean), uploader:'Student Ahmed', rating:0, reviews:0, helpful:0, verified:false, representative:false, saved:false, userHelpful:false, userRating:0, text:state.uploadDraft.text.trim() || `Student-contributed resource for ${state.uploadDraft.title.trim()}.` };
+        data.resources.unshift(resource); state.selectedResourceId=id;
+        if(state.selectedFile?.file) runtimeFiles.set(id,state.selectedFile.file);
+        const user=currentUser(); user.points+=15; user.uploads+=1;
+        if(state.uploadDraft.requestId){ const request=data.requests.find(item=>item.id===state.uploadDraft.requestId); if(request){request.fulfilled=true;user.points+=request.bounty;} }
+        persistData(); state.uploadStep=5; renderContribute(); updateShell();
+      },1300);
+    }
+    function viewPublishedResource(){ const id=state.selectedResourceId; resetUpload(false); state.view='explore'; state.courseId=data.resources.find(resource=>resource.id===id)?.courseId||state.courseId; render(); setTimeout(()=>openResource(id),50); }
+    function resetUpload(renderNow=true){ state.uploadStep=1; state.selectedFile=null; state.uploadDraft={courseId:state.courseId,type:'Previous Exam',title:'',tags:'',text:'',requestId:null}; if(renderNow)renderContribute(); }
+
+    function renderCommunity() {
+      const app=document.getElementById('app');
+      app.innerHTML=`<header class="page-head"><div><div class="eyebrow">Students help students</div><h1>Community</h1><p>Request missing material, help prioritize what matters, and recognize trusted contributors.</p></div>${state.communityTab==='requests'?'<button class="btn btn-primary" onclick="openRequestModal()"><i data-lucide="plus"></i>New request</button>':''}</header><div class="segmented"><button class="segment ${state.communityTab==='requests'?'active':''}" onclick="setCommunityTab('requests')">Resource requests</button><button class="segment ${state.communityTab==='contributors'?'active':''}" onclick="setCommunityTab('contributors')">Top contributors</button></div><div id="community-content"></div>`;
+      renderCommunityContent();
+    }
+    function setCommunityTab(tab){state.communityTab=tab;renderCommunity();}
+    function renderCommunityContent(){const target=document.getElementById('community-content');if(state.communityTab==='requests'){const active=data.requests.filter(request=>!request.fulfilled).sort((a,b)=>b.votes-a.votes);target.innerHTML=active.length?`<div class="request-list">${active.map(request=>{const course=data.courses.find(item=>item.id===request.courseId);return `<article class="card request-card"><div><div class="request-tags"><span class="badge badge-blue">${course.code}</span><span class="badge badge-gray">${request.type}</span><span class="badge badge-amber">${request.bounty} pts</span></div><h3>${escapeHtml(request.title)}</h3><p>Requested by ${escapeHtml(request.requester)}</p></div><div class="request-actions"><button class="vote-button ${request.voted?'active':''}" onclick="toggleRequestVote(${request.id})" aria-label="Upvote request" aria-pressed="${request.voted}"><i data-lucide="chevron-up"></i><span>${request.votes}</span></button><button class="btn btn-soft btn-small" onclick="fulfillRequest(${request.id})"><i data-lucide="upload-cloud"></i>Fulfill</button></div></article>`}).join('')}</div>`:`<div class="empty-state"><span class="empty-icon"><i data-lucide="check"></i></span><h3>All requests are fulfilled</h3><p>The community is up to date.</p></div>`}else{const sorted=[...data.contributors].sort((a,b)=>b.points-a.points);target.innerHTML=`<section class="card leaderboard-card">${sorted.map((person,index)=>`<div class="leader-row"><span class="leader-rank">${index<3?['🥇','🥈','🥉'][index]:index+1}</span><span class="leader-person"><span class="leader-avatar">${initials(person.name)}</span><span><strong>${escapeHtml(person.name)}${person.id===1?' <span class="badge badge-blue" style="margin-left:5px">You</span>':''}</strong><span>${escapeHtml(person.dept)} · ${person.uploads} resources</span></span></span><span class="leader-points">${person.points} pts</span></div>`).join('')}</section>`}iconRefresh();}
+    function toggleRequestVote(id){const request=data.requests.find(item=>item.id===id);if(!request)return;request.voted=!request.voted;request.votes+=request.voted?1:-1;persistData();renderCommunity();}
+    function fulfillRequest(id){const request=data.requests.find(item=>item.id===id);if(!request)return;state.uploadDraft={courseId:request.courseId,type:request.type,title:`Fulfillment: ${request.title}`,tags:'',text:'',requestId:id};state.uploadStep=1;state.selectedFile=null;navigate('contribute');notify('info',`Upload a matching resource to earn ${request.bounty} points.`);}
+
+    function openRequestModal(){const course=currentCourse();document.getElementById('request-form').innerHTML=`<div class="field full"><label for="request-title">What material do you need?</label><input id="request-title" maxlength="120" placeholder="e.g. Second exam with solutions"></div><div class="field"><label for="request-course">Course</label><select id="request-course">${data.courses.map(item=>`<option value="${item.id}" ${item.id===course.id?'selected':''}>${item.code} · ${item.name}</option>`).join('')}</select></div><div class="field"><label for="request-type">Type</label><select id="request-type">${categories.slice(1).map(category=>`<option value="${category.value}">${category.label}</option>`).join('')}</select></div><div class="field full"><label for="request-bounty">Bounty points</label><select id="request-bounty"><option value="20">20 points</option><option value="40" selected>40 points</option><option value="80">80 points</option></select></div>`;openModal('request-modal');iconRefresh();}
+    function submitRequest(){const title=document.getElementById('request-title')?.value.trim();const bounty=Number(document.getElementById('request-bounty')?.value);const user=currentUser();if(!title)return notify('error','Describe the material you need.');if(user.points<bounty)return notify('error','You do not have enough reputation points.');data.requests.push({id:Math.max(...data.requests.map(request=>request.id))+1,courseId:Number(document.getElementById('request-course').value),type:document.getElementById('request-type').value,title,requester:'Student Ahmed',votes:1,bounty,voted:true,fulfilled:false});user.points-=bounty;persistData();closePanels();state.communityTab='requests';navigate('community');notify('success','Your request is now visible to the community.');}
+
+    function openResource(id) {
+      const resource=data.resources.find(item=>item.id===id); if(!resource)return;
+      state.selectedResourceId=id;
+      const course=data.courses.find(item=>item.id===resource.courseId);
+      const hasOriginalFile=runtimeFiles.has(resource.id);
+      document.getElementById('resource-drawer-title').textContent=resource.title;
+      document.getElementById('resource-drawer-body').innerHTML=`
+        <div class="detail-block">
+          <div class="resource-card-top"><span class="type-chip"><span class="type-chip-icon" style="--resource-accent:${typeAccent(resource.type)}"><i data-lucide="${typeIcon(resource.type)}"></i></span>${resource.type}</span>${resource.verified?'<span class="verified"><i data-lucide="badge-check"></i>Community verified</span>':'<span class="badge badge-gray">Community review</span>'}</div>
+          <h2 class="resource-detail-title">${escapeHtml(resource.title)}</h2>
+          <p class="resource-detail-meta">${course.code} · ${course.instructor} · ${resource.semester}<br>Shared by ${escapeHtml(resource.uploader)}</p>
+          <div class="tag-row">${resource.tags.map(tag=>`<span class="mini-tag">#${escapeHtml(tag)}</span>`).join('')}</div>
+        </div>
+        <div class="detail-block"><div class="download-ready"><span class="download-ready-icon"><i data-lucide="file-down"></i></span><span><strong>Ready to download</strong><small>${hasOriginalFile?'Original uploaded file': 'Demo text file · original PDF or DOCX in production'}</small></span><button class="btn btn-soft btn-small" onclick="downloadResource(${resource.id})"><i data-lucide="download"></i>Download</button></div></div>
+        <div class="detail-block"><div class="detail-label">Quality summary</div><div class="quality-panel"><div class="quality-panel-top"><div><h3>${resource.verified?'Trusted by the community':'Building community confidence'}</h3><p>${resource.representative?'Marked representative of the course exam style.':'Quality updates as students review this resource.'}</p></div><span class="quality-number">${resource.reviews?resource.rating.toFixed(1):'New'}</span></div><div class="quality-signals"><div class="signal"><strong>${resource.helpful}</strong><span>Helpful votes</span></div><div class="signal"><strong>${resource.reviews}</strong><span>Ratings</span></div><div class="signal"><strong>${resource.representative?'Yes':'—'}</strong><span>Representative</span></div></div></div></div>
+        <div class="detail-block"><div class="detail-label">Resource preview</div><div class="resource-preview">${escapeHtml(resource.text)}</div></div>
+        <div class="detail-block"><div class="rating-row"><span class="rating-copy"><strong>Rate this resource</strong><span>Your feedback improves ranking.</span></span><span class="star-buttons">${[1,2,3,4,5].map(star=>`<button class="star-button ${star<=resource.userRating?'active':''}" onclick="rateResource(${resource.id},${star})" aria-label="Rate ${star} out of 5" aria-pressed="${star<=resource.userRating}"><i data-lucide="star"></i></button>`).join('')}</span></div></div>`;
+      document.getElementById('resource-drawer-foot').innerHTML=`<button class="btn btn-secondary" onclick="downloadResource(${resource.id})"><i data-lucide="download"></i>Download</button><button class="btn ${resource.userHelpful?'btn-soft':'btn-secondary'}" onclick="toggleHelpful(${resource.id})"><i data-lucide="thumbs-up"></i>${resource.userHelpful?'Helpful ✓':'Helpful'}</button><button class="btn btn-primary" onclick="askAboutResource(${resource.id})"><i data-lucide="sparkles"></i>Ask AI</button>`;
+      openDrawer('resource-drawer'); iconRefresh();
+    }
+    function toggleHelpful(id){const resource=data.resources.find(item=>item.id===id);if(!resource)return;resource.userHelpful=!resource.userHelpful;resource.helpful+=resource.userHelpful?1:-1;persistData();openResource(id);notify(resource.userHelpful?'success':'info',resource.userHelpful?'Marked as helpful.':'Helpful vote removed.');if(state.view==='explore')renderExploreResults();}
+    function rateResource(id,rating){const resource=data.resources.find(item=>item.id===id);if(!resource)return;if(resource.userRating){const total=resource.rating*resource.reviews-resource.userRating+rating;resource.rating=total/resource.reviews;}else{resource.rating=(resource.rating*resource.reviews+rating)/(resource.reviews+1);resource.reviews+=1;}resource.userRating=rating;persistData();openResource(id);notify('success','Rating saved. Thank you.');}
+
+    function openTutor(){renderTutor();openDrawer('ai-drawer');setTimeout(()=>document.getElementById('ai-input')?.focus(),280);}
+    function renderTutor(){const course=currentCourse();if(state.aiCourseId!==course.id){state.aiCourseId=course.id;state.aiMessages=[];}document.getElementById('ai-context-course').textContent=`${course.code} · ${course.name}`;if(!state.aiMessages.length)state.aiMessages.push({role:'bot',text:`I’m ready to help with ${course.name}. I’ll ground answers in the ${courseResources(course.id).length} resources shared for this course.`});document.getElementById('chat-body').innerHTML=state.aiMessages.map(message=>`<div class="chat-message ${message.role}">${escapeHtml(message.text).replace(/\n/g,'<br>')}${message.source?`<div class="source-card"><strong>Source used</strong>${escapeHtml(message.source)}</div>`:''}</div>`).join('');const topics=courseTopics[course.id]||[course.name,'core concepts','real applications'];const prompts=[`Explain ${topics[0]}`,`Create 5 quiz questions on ${topics[1]}`,`Where is ${topics[2]} used?`];document.getElementById('quick-prompts').innerHTML=prompts.map(prompt=>`<button class="quick-prompt" onclick="askTutor('${prompt.replace(/'/g,"\\'")}')">${escapeHtml(prompt)}</button>`).join('');iconRefresh();setTimeout(()=>{const body=document.getElementById('chat-body');body.scrollTop=body.scrollHeight},0);}
+    function askTutor(question){document.getElementById('ai-input').value=question;sendAiMessage();}
+    function sendAiMessage(){const input=document.getElementById('ai-input');const query=input?.value.trim();if(!query)return;state.aiMessages.push({role:'user',text:query});input.value='';renderTutor();setTimeout(()=>{const answer=generateAiAnswer(query);state.aiMessages.push({role:'bot',text:answer.text,source:answer.source});renderTutor();},650);}
+    function generateAiAnswer(query){const q=query.toLowerCase();const resources=courseResources(state.courseId);const best=resources.find(resource=>resource.tags.some(tag=>q.includes(tag.toLowerCase())))||resources[0];if(q.includes('question')||q.includes('quiz')||q.includes('exam'))return{text:'Here are three course-focused practice prompts:\n1. Identify the correct method and explain why.\n2. Solve a representative problem step by step.\n3. Describe one common exam mistake and how to avoid it.',source:best?.title};if(q.includes('why')||q.includes('career')||q.includes('used')){const relevance=(data.career[state.courseId]||[])[0];return{text:relevance?`${relevance.title}: ${relevance.description}`:'This topic builds problem-solving patterns that transfer to real systems and technical work.',source:best?.title};}if(q.includes('integration'))return{text:'Integration by parts rewrites an integral using ∫u dv = uv - ∫v du. Choose u with the LIATE guideline, compute du and v, then simplify the remaining integral. Start by checking whether the product becomes easier after differentiating one factor.',source:best?.title};if(q.includes('avl')||q.includes('rotation'))return{text:'An AVL tree keeps every node’s balance factor between -1 and 1. After insertion, move upward to the first unbalanced node and choose LL, RR, LR, or RL rotation based on the insertion path.',source:best?.title};return{text:best?`Based on “${best.title}”, the key idea is: ${best.text.slice(0,220)}${best.text.length>220?'…':''}`:'I could not find a matching course source yet. Try another phrase or contribute lecture notes to expand the course knowledge base.',source:best?.title};}
+    function askAboutResource(id){const resource=data.resources.find(item=>item.id===id);if(!resource)return;closePanels();state.courseId=resource.courseId;updateShell();openTutor();setTimeout(()=>askTutor(`Summarize the key ideas in ${resource.title}`),80);}
+
+    function openCourseCatalog() {
+      const univSelect = document.getElementById('catalog-univ');
+      if (univSelect) {
+        univSelect.innerHTML = data.universities.map(u => `<option value="${u.id}" ${u.id===state.universityId?'selected':''}>${u.name}</option>`).join('');
+      }
+      filterCatalogUniv(state.universityId, false);
+      const searchInput = document.getElementById('catalog-search');
+      if (searchInput) searchInput.value = '';
+      openModal('catalog-modal');
+      renderCatalogGrid('');
+      iconRefresh();
+    }
+
+    function filterCatalogUniv(univId, updateGrid = true) {
+      state.universityId = Number(univId);
+      const majors = data.majors.filter(m => m.universityId === state.universityId);
+      if (!majors.some(m => m.id === state.majorId)) {
+        state.majorId = majors[0]?.id || 1;
+      }
+      const majorSelect = document.getElementById('catalog-major');
+      if (majorSelect) {
+        majorSelect.innerHTML = majors.map(m => `<option value="${m.id}" ${m.id===state.majorId?'selected':''}>${m.name}</option>`).join('');
+      }
+      if (updateGrid) renderCatalogGrid();
+    }
+
+    function filterCatalogMajor(majorId) {
+      state.majorId = Number(majorId);
+      renderCatalogGrid();
+    }
+
+    function filterCatalogSearch(query) {
+      renderCatalogGrid(query);
+    }
+
+    function renderCatalogGrid(query = '') {
+      const target = document.getElementById('catalog-courses-grid');
+      if (!target) return;
+      const q = (query !== undefined ? query : (document.getElementById('catalog-search')?.value || '')).trim().toLowerCase();
+      
+      let courses = data.courses;
+      if (!q) {
+        courses = courses.filter(c => c.majorId === state.majorId);
+      } else {
+        courses = courses.filter(c => 
+          c.code.toLowerCase().includes(q) || 
+          c.name.toLowerCase().includes(q) || 
+          c.instructor.toLowerCase().includes(q)
+        );
+      }
+
+      if (!courses.length) {
+        target.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><span class="empty-icon"><i data-lucide="search-x"></i></span><h3>No matching courses</h3><p>Try searching another course code (e.g. MATH 201, CS 211, SE 312) or change the major filter.</p></div>`;
+        iconRefresh();
+        return;
+      }
+
+      target.innerHTML = courses.map(course => {
+        const resCount = courseResources(course.id).length;
+        const isActive = course.id === state.courseId;
+        const isSelected = state.selectedCourseIds.includes(course.id);
+        return `
+          <div class="card catalog-course-card ${isActive ? 'active-course' : ''}" style="padding: 14px; cursor: pointer; border: 2px solid ${isActive ? 'var(--blue-600)' : 'var(--line)'}; border-radius: 14px; transition: var(--ease); background: ${isActive ? 'var(--blue-50)' : 'var(--surface)'};" onclick="selectCourseFromCatalog(${course.id})">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <span class="badge ${isActive ? 'badge-blue' : 'badge-gray'}">${course.code}</span>
+              ${isActive ? '<span class="badge badge-green">Active ✓</span>' : isSelected ? '<span class="badge badge-blue">Selected</span>' : ''}
+            </div>
+            <strong style="display: block; font-size: 13px; color: var(--ink-900); margin-bottom: 4px;">${escapeHtml(course.name)}</strong>
+            <p style="color: var(--ink-500); font-size: 10px; margin-bottom: 10px;">${escapeHtml(course.instructor)} · ${course.semester}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--blue-700); font-weight: 750;">
+              <span>${resCount} materials</span>
+              <span>Open course →</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      iconRefresh();
+    }
+
+    function selectCourseFromCatalog(courseId) {
+      state.courseId = courseId;
+      if (!state.selectedCourseIds.includes(courseId)) {
+        state.selectedCourseIds.push(courseId);
+      }
+      const course = data.courses.find(c => c.id === courseId);
+      if (course) {
+        state.majorId = course.majorId;
+        const major = data.majors.find(m => m.id === course.majorId);
+        if (major) state.universityId = major.universityId;
+      }
+      state.uploadDraft.courseId = courseId;
+      persistData();
+      closePanels();
+      navigate('course');
+      updateShell();
+      notify('success', `Switched active course to ${currentCourse().code}: ${currentCourse().name}`);
+    }
+
+    function openDrawer(id){closePanels(false);document.getElementById(id).classList.add('open');document.getElementById(id).setAttribute('aria-hidden','false');document.getElementById('panel-backdrop').classList.add('visible');document.body.classList.add('panel-open');}
+    function openModal(id){closePanels(false);document.getElementById(id).classList.add('open');document.getElementById(id).setAttribute('aria-hidden','false');document.getElementById('panel-backdrop').classList.add('visible');document.body.classList.add('panel-open');}
+    function closePanels(clearBackdrop=true){document.querySelectorAll('.drawer,.modal').forEach(panel=>{panel.classList.remove('open');panel.setAttribute('aria-hidden','true')});if(clearBackdrop){document.getElementById('panel-backdrop').classList.remove('visible');document.body.classList.remove('panel-open');}}
+
+    function notify(type,message){const stack=document.getElementById('toast-stack');const id=`toast-${Date.now()}`;const icon=type==='success'?'check-circle-2':type==='error'?'circle-alert':'info';stack.insertAdjacentHTML('beforeend',`<div class="toast ${type}" id="${id}"><i data-lucide="${icon}"></i><span>${escapeHtml(message)}</span></div>`);iconRefresh();setTimeout(()=>document.getElementById(id)?.remove(),3300);}
+
+    document.addEventListener('keydown',event=>{if(event.key==='Escape')closePanels();});
+    document.addEventListener('click',event=>{if(!event.target.closest('.course-multi')){state.coursePickerOpen=false;const picker=document.getElementById('course-multi');picker?.classList.remove('open');picker?.querySelector('.multi-select-trigger')?.setAttribute('aria-expanded','false');}});
+    window.addEventListener('load',()=>{restoreData();state.uploadDraft.courseId=state.courseId;const hash=location.hash.replace('#/','');if(['home','explore','course','contribute','community'].includes(hash))state.view=hash;render();});
+  </script>
+</body>
+</html>

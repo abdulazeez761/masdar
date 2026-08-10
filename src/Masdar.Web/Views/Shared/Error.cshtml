@@ -1,0 +1,30 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Something went wrong";
+    ViewData["BodyClass"] = "status-page";
+}
+
+<section class="status-card card" aria-labelledby="error-title">
+    <div class="status-illustration status-illustration-error" aria-hidden="true">
+        <svg><use href="#icon-alert"></use></svg>
+    </div>
+    <p class="eyebrow">Unexpected error</p>
+    <h1 id="error-title">We couldn’t complete that request.</h1>
+    <p class="status-copy">
+        Your data is safe. Try the action again, or return to the dashboard and continue browsing MASDAR.
+    </p>
+    <div class="status-actions">
+        <a class="btn btn-primary" asp-area="" asp-controller="Home" asp-action="Index">
+            <svg aria-hidden="true"><use href="#icon-home"></use></svg>
+            <span>Back to home</span>
+        </a>
+        <button class="btn btn-secondary" type="button" onclick="window.location.reload()">Try again</button>
+    </div>
+    @if (Model.ShowRequestId)
+    {
+        <p class="request-id">
+            <span>Reference ID</span>
+            <code>@Model.RequestId</code>
+        </p>
+    }
+</section>

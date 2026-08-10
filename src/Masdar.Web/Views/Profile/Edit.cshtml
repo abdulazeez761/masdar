@@ -1,0 +1,21 @@
+@model Masdar.Web.ViewModels.EditProfileViewModel
+@{
+    ViewData["Title"] = "Edit profile";
+}
+
+<header class="page-head"><div><div class="eyebrow">Profile settings</div><h1>Edit your profile</h1><p>Keep your academic context accurate so Masdar can personalize courses and resources.</p></div></header>
+
+<div class="row justify-content-center"><div class="col-lg-8">
+    <form asp-action="Edit" method="post" class="card p-4">
+        @Html.AntiForgeryToken()<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <div class="row g-3">
+            <div class="col-12 field"><label asp-for="DisplayName" class="form-label"></label><input asp-for="DisplayName" class="form-control" autocomplete="name" /><span asp-validation-for="DisplayName" class="text-danger"></span></div>
+            <div class="col-md-6 field"><label asp-for="UniversityId" class="form-label"></label><select asp-for="UniversityId" asp-items="Model.Universities" class="form-select"><option value="">Choose a university</option></select><span asp-validation-for="UniversityId" class="text-danger"></span></div>
+            <div class="col-md-6 field"><label asp-for="MajorId" class="form-label"></label><select asp-for="MajorId" asp-items="Model.Majors" class="form-select"><option value="">Choose a major</option></select><span asp-validation-for="MajorId" class="text-danger"></span></div>
+            <div class="col-12 field"><label asp-for="Bio" class="form-label"></label><textarea asp-for="Bio" rows="5" class="form-control" placeholder="What are you studying, building, or hoping to learn?"></textarea><span asp-validation-for="Bio" class="text-danger"></span></div>
+        </div>
+        <div class="d-flex gap-2 mt-4"><button class="btn btn-primary" type="submit">Save profile</button><a class="btn btn-secondary" asp-action="Index">Cancel</a><a class="btn btn-soft ms-auto" asp-area="Identity" asp-page="/Account/Manage/Index">Account &amp; password</a></div>
+    </form>
+</div></div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

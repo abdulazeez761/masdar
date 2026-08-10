@@ -1,0 +1,21 @@
+@model Masdar.Web.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Your profile";
+}
+
+<header class="page-head">
+    <div><div class="eyebrow">Your Masdar identity</div><h1>@Model.DisplayName</h1><p>@Model.Email@if (!string.IsNullOrWhiteSpace(Model.University)) { <span> · @Model.University</span> }@if (!string.IsNullOrWhiteSpace(Model.Major)) { <span> · @Model.Major</span> }</p></div>
+    <a class="btn btn-primary" asp-action="Edit">Edit profile</a>
+</header>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3"><article class="card p-3 h-100"><span class="text-muted">Reputation</span><strong class="fs-3">@Model.ReputationPoints</strong><small>points</small></article></div>
+    <div class="col-sm-6 col-lg-3"><article class="card p-3 h-100"><span class="text-muted">Contributions</span><strong class="fs-3">@Model.UploadedResourceCount</strong><small>resources</small></article></div>
+    <div class="col-sm-6 col-lg-3"><article class="card p-3 h-100"><span class="text-muted">Saved</span><strong class="fs-3">@Model.SavedResourceCount</strong><small>resources</small></article></div>
+    <div class="col-sm-6 col-lg-3"><article class="card p-3 h-100"><span class="text-muted">Roadmap</span><strong class="fs-3">@Model.CompletedRoadmapCount</strong><small>topics complete</small></article></div>
+</div>
+
+<div class="row g-4">
+    <section class="col-lg-4"><article class="card p-4 h-100"><h2 class="h5">About</h2><p>@(string.IsNullOrWhiteSpace(Model.Bio) ? "Add a short bio so contributors know what you study and care about." : Model.Bio)</p><dl class="small mb-0"><dt>Department</dt><dd>@(Model.Department ?? "Not set")</dd><dt>University</dt><dd>@(Model.University ?? "Not set")</dd><dt>Major</dt><dd>@(Model.Major ?? "Not set")</dd></dl></article></section>
+    <section class="col-lg-8" aria-labelledby="uploads-heading"><div class="section-head"><div><h2 id="uploads-heading">Recent contributions</h2><p>Your newest submitted resources.</p></div><a asp-controller="Contributions" asp-action="Create">Upload another</a></div>@if (Model.RecentUploads.Count == 0) { <div class="empty-state card p-5"><h3>No contributions yet</h3><p>Share a resource that helped you learn.</p><a class="btn btn-primary" asp-controller="Contributions" asp-action="Create">Contribute</a></div> } else { <div class="row g-3">@foreach (var resource in Model.RecentUploads) { <div class="col-md-6"><partial name="~/Views/Resources/_ResourceCard.cshtml" model="resource" /></div> }</div> }</section>
+</div>

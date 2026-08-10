@@ -1,0 +1,299 @@
+@model DashboardAnalyticsViewModel
+@{
+    ViewData["Title"] = "Admin dashboard";
+    ViewData["BodyClass"] = "admin-dashboard-page";
+    var inactiveUsers = Math.Max(0, Model.TotalUsers - Model.ActiveUsers);
+    var unpublishedResources = Math.Max(0, Model.TotalResources - Model.PublishedResources - Model.PendingResources);
+    var unresolvedRequests = Math.Max(0, Model.TotalRequests - Model.OpenRequests - Model.FulfilledRequests);
+}
+
+<partial name="_AdminNav" />
+
+<header class="page-head admin-dashboard-header">
+    <div>
+        <span class="eyebrow">Platform intelligence</span>
+        <h1>MASDAR at a glance</h1>
+        <p>Moderation priorities, community growth, learning quality, and recent platform activity in one operational view.</p>
+    </div>
+    <div class="admin-header-meta">
+        <span class="admin-live-pill"><span aria-hidden="true"></span>Live database</span>
+        <time datetime="@Model.GeneratedAtUtc.ToString("O")">Updated @Model.GeneratedAtUtc.ToString("HH:mm") UTC</time>
+        <a class="btn btn-secondary btn-small" asp-action="Index">Refresh</a>
+    </div>
+</header>
+
+<nav class="admin-quick-actions" aria-label="Quick administrative actions">
+    <a asp-controller="Resources" asp-action="Index" asp-route-attention="true">
+        <span class="admin-quick-icon admin-tone-amber"><svg aria-hidden="true"><use href="#icon-shield"></use></svg></span>
+        <span><strong>Review resources</strong><small>@Model.ModerationQueueCount item@(Model.ModerationQueueCount == 1 ? "" : "s") need attention</small></span>
+        <svg class="admin-action-arrow" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+    </a>
+    <a asp-controller="Courses" asp-action="Create">
+        <span class="admin-quick-icon admin-tone-blue"><svg aria-hidden="true"><use href="#icon-book"></use></svg></span>
+        <span><strong>Add a course</strong><small>Expand the active catalog</small></span>
+        <svg class="admin-action-arrow" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+    </a>
+    <a asp-controller="Opportunities" asp-action="Create">
+        <span class="admin-quick-icon admin-tone-cyan"><svg aria-hidden="true"><use href="#icon-sparkles"></use></svg></span>
+        <span><strong>Publish opportunity</strong><small>Share an upcoming program</small></span>
+        <svg class="admin-action-arrow" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+    </a>
+    <a asp-controller="ActivityLogs" asp-action="Index">
+        <span class="admin-quick-icon admin-tone-green"><svg aria-hidden="true"><use href="#icon-check"></use></svg></span>
+        <span><strong>Open audit log</strong><small>Trace administrative changes</small></span>
+        <svg class="admin-action-arrow" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+    </a>
+</nav>
+
+<section class="admin-kpi-grid" aria-label="Platform key performance indicators">
+    @foreach (var kpi in Model.Kpis)
+    {
+        <article class="card admin-kpi admin-kpi-@kpi.Tone">
+            <div class="admin-kpi-top">
+                <span class="admin-kpi-icon"><svg aria-hidden="true"><use href="#@kpi.IconId"></use></svg></span>
+                <span class="admin-kpi-label">@kpi.Label</span>
+            </div>
+            <strong class="admin-kpi-value">@kpi.Value.ToString("N0")</strong>
+            <p>@kpi.SupportingText</p>
+            <div class="admin-kpi-deltas" aria-label="Recent change">
+                <span><strong>+@kpi.Delta7Days.ToString("N0")</strong> @kpi.DeltaDescription <small>7 days</small></span>
+                <span><strong>+@kpi.Delta30Days.ToString("N0")</strong> @kpi.DeltaDescription <small>30 days</small></span>
+            </div>
+        </article>
+    }
+</section>
+
+<div class="admin-dashboard-grid admin-priority-grid">
+    <section class="card admin-dashboard-panel" aria-labelledby="moderation-heading">
+        <div class="admin-panel-header">
+            <div>
+                <span class="admin-section-kicker">Action required</span>
+                <h2 id="moderation-heading">Moderation queue</h2>
+                <p>Oldest and highest-risk submissions are shown first.</p>
+            </div>
+            <a class="btn btn-secondary btn-small" asp-controller="Resources" asp-action="Index" asp-route-attention="true">View all @Model.ModerationQueueCount</a>
+        </div>
+
+        @if (Model.ModerationQueue.Count == 0)
+        {
+            <div class="admin-empty-state admin-empty-success">
+                <span><svg aria-hidden="true"><use href="#icon-check"></use></svg></span>
+                <div><strong>Queue cleared</strong><p>There are no pending or scan-blocked resources.</p></div>
+            </div>
+        }
+        else
+        {
+            <div class="admin-moderation-list">
+                @foreach (var item in Model.ModerationQueue)
+                {
+                    <article class="admin-moderation-row">
+                        <span class="admin-priority-dot admin-tone-@item.Tone" aria-hidden="true"></span>
+                        <div class="admin-row-copy">
+                            <strong>@item.Title</strong>
+                            <small>@item.CourseCode · @item.UploaderName · submitted <time datetime="@item.CreatedAtUtc.ToString("O")">@item.CreatedAtUtc.ToLocalTime().ToString("MMM d, HH:mm")</time></small>
+                        </div>
+                        <div class="admin-row-status">
+                            <span class="admin-badge admin-badge-@item.Tone">@item.ScanStatus</span>
+                            <span class="admin-badge admin-badge-gray">@item.PublicationStatus</span>
+                        </div>
+                        <a class="btn btn-secondary btn-small" asp-controller="Resources" asp-action="Details" asp-route-id="@item.Id">Review</a>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    <aside class="card admin-dashboard-panel admin-snapshot-panel" aria-labelledby="snapshot-heading">
+        <div class="admin-panel-header">
+            <div><span class="admin-section-kicker">Platform scope</span><h2 id="snapshot-heading">Operational snapshot</h2><p>Current records by core product area.</p></div>
+        </div>
+        <div class="admin-snapshot-list">
+            <a asp-controller="Users" asp-action="Index">
+                <span class="admin-snapshot-icon admin-tone-blue"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span>
+                <span><strong>@Model.TotalUsers.ToString("N0") users</strong><small>@Model.ActiveUsers.ToString("N0") active · @inactiveUsers.ToString("N0") inactive</small></span>
+                <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+            </a>
+            <a asp-controller="Resources" asp-action="Index">
+                <span class="admin-snapshot-icon admin-tone-green"><svg aria-hidden="true"><use href="#icon-library"></use></svg></span>
+                <span><strong>@Model.TotalResources.ToString("N0") resources</strong><small>@Model.PublishedResources.ToString("N0") published · @Model.PendingResources.ToString("N0") pending · @unpublishedResources.ToString("N0") other</small></span>
+                <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+            </a>
+            <a asp-area="" asp-controller="Community" asp-action="Index">
+                <span class="admin-snapshot-icon admin-tone-amber"><svg aria-hidden="true"><use href="#icon-info"></use></svg></span>
+                <span><strong>@Model.TotalRequests.ToString("N0") requests</strong><small>@Model.OpenRequests.ToString("N0") open · @Model.FulfilledRequests.ToString("N0") fulfilled · @unresolvedRequests.ToString("N0") other</small></span>
+                <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+            </a>
+            <a asp-controller="Opportunities" asp-action="Index">
+                <span class="admin-snapshot-icon admin-tone-cyan"><svg aria-hidden="true"><use href="#icon-sparkles"></use></svg></span>
+                <span><strong>@Model.TotalOpportunities.ToString("N0") opportunities</strong><small>@Model.UpcomingOpportunities.ToString("N0") upcoming · @Model.ActiveRegistrations.ToString("N0") active registrations</small></span>
+                <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+            </a>
+        </div>
+        <div class="admin-scope-footer">
+            <span><strong>@Model.ActiveUniversities</strong> active universities</span>
+            <span><strong>@Model.ActiveCourses</strong> active courses</span>
+        </div>
+    </aside>
+</div>
+
+<div class="admin-dashboard-grid admin-insights-grid">
+    <section class="card admin-dashboard-panel" aria-labelledby="distribution-heading">
+        <div class="admin-panel-header">
+            <div><span class="admin-section-kicker">Content mix</span><h2 id="distribution-heading">Published resource types</h2><p>Distribution across the verified knowledge base.</p></div>
+            <span class="admin-panel-total">@Model.PublishedResources.ToString("N0") total</span>
+        </div>
+        @if (Model.ResourceTypes.Count == 0)
+        {
+            <div class="admin-empty-state"><span><svg aria-hidden="true"><use href="#icon-library"></use></svg></span><div><strong>No published content</strong><p>Resource distribution will appear after the first publication.</p></div></div>
+        }
+        else
+        {
+            <div class="admin-distribution" role="img" aria-label="Published resource type distribution">
+                @foreach (var item in Model.ResourceTypes)
+                {
+                    <div class="admin-distribution-row">
+                        <div><span class="admin-legend-dot admin-tone-@item.Tone" aria-hidden="true"></span><strong>@item.Label</strong><small>@item.Count.ToString("N0") · @item.SharePercent.ToString("0.#")%</small></div>
+                        <span class="admin-bar-track"><span class="admin-bar-fill admin-tone-@item.Tone" style="--bar-percent:@item.BarPercent%"></span></span>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="card admin-dashboard-panel" aria-labelledby="quality-heading">
+        <div class="admin-panel-header">
+            <div><span class="admin-section-kicker">Trust signals</span><h2 id="quality-heading">Resource quality</h2><p>Verification, file readiness, and community validation.</p></div>
+        </div>
+        <div class="admin-quality-layout">
+            <div class="admin-quality-ring" style="--quality-percent:@Model.VerificationCoveragePercent" role="img" aria-label="@Model.VerificationCoveragePercent percent of published resources verified">
+                <span><strong>@Model.VerificationCoveragePercent%</strong><small>verified</small></span>
+            </div>
+            <dl class="admin-quality-metrics">
+                <div><dt>Average rating</dt><dd><strong>@Model.AverageRating.ToString("0.0")</strong><span>/ 5 from @Model.RatingCount.ToString("N0") ratings</span></dd></div>
+                <div><dt>File scan readiness</dt><dd><strong>@Model.ScanReadyPercent%</strong><span>of all resources validated</span></dd></div>
+                <div><dt>Helpful votes</dt><dd><strong>@Model.HelpfulVoteCount.ToString("N0")</strong><span>community quality signals</span></dd></div>
+                <div><dt>Representative items</dt><dd><strong>@Model.RepresentativeResourceCount.ToString("N0")</strong><span>flagged as course exemplars</span></dd></div>
+            </dl>
+        </div>
+    </section>
+</div>
+
+<div class="admin-dashboard-grid admin-ranking-grid">
+    <section class="card admin-dashboard-panel" aria-labelledby="courses-heading">
+        <div class="admin-panel-header">
+            <div><span class="admin-section-kicker">Knowledge activity</span><h2 id="courses-heading">Top courses</h2><p>Ranked by published resource volume.</p></div>
+            <a class="admin-section-link" asp-controller="Courses" asp-action="Index">Manage courses</a>
+        </div>
+        @if (Model.TopCourses.Count == 0)
+        {
+            <div class="admin-empty-state"><span><svg aria-hidden="true"><use href="#icon-book"></use></svg></span><div><strong>No active courses</strong><p>Add a course to begin measuring engagement.</p></div></div>
+        }
+        else
+        {
+            <ol class="admin-course-ranking">
+                @for (var index = 0; index < Model.TopCourses.Count; index++)
+                {
+                    var course = Model.TopCourses[index];
+                    <li>
+                        <span class="admin-rank">@(index + 1)</span>
+                        <div class="admin-course-copy"><a asp-controller="Courses" asp-action="Edit" asp-route-id="@course.Id"><strong>@course.Code</strong> @course.Name</a><span class="admin-bar-track"><span class="admin-bar-fill admin-tone-blue" style="--bar-percent:@course.VolumePercent%"></span></span></div>
+                        <div class="admin-course-metrics"><strong>@course.PublishedResourceCount</strong><small>resources</small></div>
+                        <div class="admin-course-secondary"><span>@course.StudentCount students</span><span>@course.OpenRequestCount open requests</span><span>@(course.AverageRating > 0 ? $"★ {course.AverageRating:0.0}" : "No ratings")</span></div>
+                    </li>
+                }
+            </ol>
+        }
+    </section>
+
+    <section class="card admin-dashboard-panel" aria-labelledby="contributors-heading">
+        <div class="admin-panel-header">
+            <div><span class="admin-section-kicker">Community leaders</span><h2 id="contributors-heading">Top contributors</h2><p>Published work and community usefulness.</p></div>
+            <a class="admin-section-link" asp-controller="Users" asp-action="Index">Manage users</a>
+        </div>
+        @if (Model.TopContributors.Count == 0)
+        {
+            <div class="admin-empty-state"><span><svg aria-hidden="true"><use href="#icon-users"></use></svg></span><div><strong>No contributors yet</strong><p>Contributor rankings appear after resources are published.</p></div></div>
+        }
+        else
+        {
+            <div class="admin-contributor-list">
+                @foreach (var contributor in Model.TopContributors)
+                {
+                    <a asp-controller="Users" asp-action="Details" asp-route-id="@contributor.Id">
+                        <span class="admin-contributor-avatar" aria-hidden="true">@contributor.Initials</span>
+                        <span class="admin-row-copy"><strong>@contributor.DisplayName</strong><small>@contributor.PublishedResourceCount published · @contributor.HelpfulVoteCount helpful votes</small></span>
+                        <span class="admin-contributor-score"><strong>@contributor.ReputationBalance.ToString("N0")</strong><small>points · @(contributor.AverageRating > 0 ? $"★ {contributor.AverageRating:0.0}" : "unrated")</small></span>
+                        <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+                    </a>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+<section class="admin-recent-section" aria-labelledby="recent-heading">
+    <div class="section-head">
+        <div><h2 id="recent-heading">Recent platform activity</h2><p>New content, opportunity interest, and audited changes.</p></div>
+    </div>
+    <div class="admin-recent-grid">
+        <article class="card admin-recent-card">
+            <div class="admin-recent-head"><span class="admin-recent-icon admin-tone-green"><svg aria-hidden="true"><use href="#icon-upload"></use></svg></span><div><h3>Latest resources</h3><p>Newest community submissions</p></div><a asp-controller="Resources" asp-action="Index">All</a></div>
+            @if (Model.RecentResources.Count == 0)
+            {
+                <p class="admin-mini-empty">No resources have been submitted.</p>
+            }
+            else
+            {
+                <div class="admin-recent-list">
+                    @foreach (var resource in Model.RecentResources)
+                    {
+                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@resource.Id">
+                            <span class="admin-row-copy"><strong>@resource.Title</strong><small>@resource.CourseCode · @resource.UploaderName · <time datetime="@resource.CreatedAtUtc.ToString("O")">@resource.CreatedAtUtc.ToLocalTime().ToString("MMM d")</time></small></span>
+                            <span class="admin-badge admin-badge-@resource.StatusTone">@resource.Status</span>
+                        </a>
+                    }
+                </div>
+            }
+        </article>
+
+        <article class="card admin-recent-card">
+            <div class="admin-recent-head"><span class="admin-recent-icon admin-tone-cyan"><svg aria-hidden="true"><use href="#icon-sparkles"></use></svg></span><div><h3>Recent registrations</h3><p>Latest opportunity interest</p></div><a asp-controller="Opportunities" asp-action="Index">All</a></div>
+            @if (Model.RecentRegistrations.Count == 0)
+            {
+                <p class="admin-mini-empty">No opportunity registrations yet.</p>
+            }
+            else
+            {
+                <div class="admin-recent-list">
+                    @foreach (var registration in Model.RecentRegistrations)
+                    {
+                        <a asp-controller="Opportunities" asp-action="Edit" asp-route-id="@registration.OpportunityId">
+                            <span class="admin-row-copy"><strong>@registration.OpportunityTitle</strong><small>@registration.UserName · @registration.OpportunityType · <time datetime="@registration.RegisteredAtUtc.ToString("O")">@registration.RegisteredAtUtc.ToLocalTime().ToString("MMM d")</time></small></span>
+                            <span class="admin-badge admin-badge-@registration.StatusTone">@registration.Status</span>
+                        </a>
+                    }
+                </div>
+            }
+        </article>
+
+        <article class="card admin-recent-card">
+            <div class="admin-recent-head"><span class="admin-recent-icon admin-tone-amber"><svg aria-hidden="true"><use href="#icon-shield"></use></svg></span><div><h3>Audit activity</h3><p>Latest administrative events</p></div><a asp-controller="ActivityLogs" asp-action="Index">All</a></div>
+            @if (Model.RecentActivity.Count == 0)
+            {
+                <p class="admin-mini-empty">No administrative activity recorded.</p>
+            }
+            else
+            {
+                <div class="admin-recent-list admin-activity-list">
+                    @foreach (var activity in Model.RecentActivity)
+                    {
+                        <div>
+                            <span class="admin-activity-dot admin-tone-@activity.Tone" aria-hidden="true"></span>
+                            <span class="admin-row-copy"><strong>@activity.Action</strong><small>@activity.ActorName · @activity.Description · <time datetime="@activity.CreatedAtUtc.ToString("O")">@activity.CreatedAtUtc.ToLocalTime().ToString("MMM d, HH:mm")</time></small></span>
+                        </div>
+                    }
+                </div>
+            }
+        </article>
+    </div>
+</section>

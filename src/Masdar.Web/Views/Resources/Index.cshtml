@@ -1,0 +1,211 @@
+@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.Primitives
+@model Masdar.Web.ViewModels.ResourceExplorerViewModel
+@{
+    ViewData["Title"] = "Explore resources";
+    ViewData["BodyClass"] = "prototype-study-page";
+
+    string ExplorerUrl(
+        string? selectedType = null,
+        bool clearType = false,
+        int? pageNumber = null,
+        bool? savedOnly = null,
+        string? selectedSort = null)
+    {
+        var query = new List<KeyValuePair<string, StringValues>>
+        {
+            new("universityId", Model.UniversityId.ToString()),
+            new("majorId", Model.MajorId.ToString()),
+            new("sort", selectedSort ?? Model.Sort)
+        };
+        if (Model.SelectedCourseIds.Count > 0)
+            query.Add(new("courseIds", new StringValues(Model.SelectedCourseIds.Select(x => x.ToString()).ToArray())));
+        if (!string.IsNullOrWhiteSpace(Model.Search)) query.Add(new("search", Model.Search));
+        if (!string.IsNullOrWhiteSpace(Model.Semester)) query.Add(new("semester", Model.Semester));
+        var typeValue = clearType ? null : selectedType ?? Model.Type;
+        if (!string.IsNullOrWhiteSpace(typeValue)) query.Add(new("type", typeValue));
+        if (savedOnly ?? Model.SavedOnly) query.Add(new("savedOnly", "true"));
+        if (pageNumber is > 1) query.Add(new("page", pageNumber.GetValueOrDefault().ToString()));
+        return (Url.Action("Index", "Resources") ?? "/Resources") + QueryString.Create(query);
+    }
+
+    var currentReturnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/prototype-pages.css" asp-append-version="true" /> }
+
+<header class="prototype-page-head">
+    <div>
+        <div class="prototype-eyebrow">Browse <span>→</span> Find <span>→</span> Learn</div>
+        <h1>Find course resources</h1>
+        <p>Start with your academic context, then compare resources using clear community quality signals.</p>
+    </div>
+    <a class="prototype-primary-action" asp-controller="Contributions" asp-action="Create">
+        <span aria-hidden="true">↥</span> Share a resource
+    </a>
+</header>
+
+<section class="academic-context-card" aria-labelledby="academic-context-title">
+    <div class="context-card-heading">
+        <span class="context-heading-icon" aria-hidden="true">☷</span>
+        <div><h2 id="academic-context-title">What are you studying?</h2><p>Select one or more courses</p></div>
+    </div>
+
+    <form method="get" asp-action="Index" class="academic-context-form">
+        <div class="context-field">
+            <label for="resource-university">University</label>
+            <select id="resource-university" name="universityId">
+                @foreach (var university in Model.Universities)
+                {
+                    <option value="@university.Id" selected="@(university.Id == Model.UniversityId)">@university.Name</option>
+                }
+            </select>
+        </div>
+        <div class="context-field">
+            <label for="resource-major">Major</label>
+            <select id="resource-major" name="majorId">
+                @foreach (var major in Model.Majors)
+                {
+                    <option value="@major.Id" selected="@(major.Id == Model.MajorId)">@major.Name</option>
+                }
+            </select>
+        </div>
+        <div class="context-field course-picker-field">
+            <label id="course-picker-label">Courses</label>
+            <details class="course-multi-picker">
+                <summary aria-labelledby="course-picker-label">
+                    <span>@(Model.SelectedCourses.Count == 0 ? "Choose courses to add" : $"{Model.SelectedCourses.Count} selected in this major")</span>
+                    <span aria-hidden="true">⌄</span>
+                </summary>
+                <fieldset class="course-picker-menu">
+                    <legend class="visually-hidden">Select one or more courses</legend>
+                    @if (Model.AvailableCourses.Count == 0)
+                    {
+                        <p class="course-picker-empty">No active courses in this major.</p>
+                    }
+                    @foreach (var course in Model.AvailableCourses)
+                    {
+                        <label class="course-picker-option">
+                            <input type="checkbox" name="courseIds" value="@course.Id" checked="@course.IsSelected" />
+                            <span class="course-picker-check" aria-hidden="true">✓</span>
+                            <span><strong>@course.Code</strong><small>@course.Name</small></span>
+                            @if (course.IsActive) { <em>Active</em> }
+                        </label>
+                    }
+                    <button type="submit" class="course-picker-apply">Apply course selection</button>
+                </fieldset>
+            </details>
+        </div>
+        <button type="submit" class="context-update-button">Update context</button>
+    </form>
+
+    <div class="selected-course-bar">
+        <span class="selected-course-label">Selected courses</span>
+        <div class="selected-course-chips">
+            @foreach (var course in Model.SelectedCourses)
+            {
+                <span class="selected-course-chip @(course.IsActive ? "is-active" : "")">
+                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id">@course.Code</a>
+                    @if (course.IsActive)
+                    {
+                        <small>Active</small>
+                    }
+                    else if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-action="SetActiveCourse" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@course.Id" />
+                            <input type="hidden" name="returnUrl" value="@currentReturnUrl" />
+                            <button type="submit" title="Use @course.Code for the workspace and tutor" aria-label="Make @course.Code your active course">○</button>
+                        </form>
+                    }
+                </span>
+            }
+        </div>
+        <span class="selected-course-hint">@Model.SelectedCourses.Count selected · the blue course is active for your workspace and tutor</span>
+    </div>
+</section>
+
+<nav class="resource-type-strip" aria-label="Resource type">
+    @foreach (var option in Model.ResourceTypes)
+    {
+        <a class="resource-type-chip @(option.IsSelected ? "is-active" : "")"
+           href="@ExplorerUrl(selectedType: option.Value, clearType: string.IsNullOrEmpty(option.Value))"
+           aria-current="@(option.IsSelected ? "true" : null)">
+            <span class="filter-icon icon-@option.Icon" aria-hidden="true"></span>
+            <span>@option.Label</span>
+        </a>
+    }
+</nav>
+
+<form method="get" asp-action="Index" class="resource-results-toolbar" role="search">
+    <input type="hidden" name="universityId" value="@Model.UniversityId" />
+    <input type="hidden" name="majorId" value="@Model.MajorId" />
+    @foreach (var selectedCourseId in Model.SelectedCourseIds) { <input type="hidden" name="courseIds" value="@selectedCourseId" /> }
+    @if (!string.IsNullOrWhiteSpace(Model.Type)) { <input type="hidden" name="type" value="@Model.Type" /> }
+    <div class="resource-search-box">
+        <span aria-hidden="true">⌕</span>
+        <label class="visually-hidden" for="resource-search">Search selected course resources</label>
+        <input id="resource-search" type="search" name="search" value="@Model.Search" placeholder="Search across @Model.ScopeLabel" />
+        <button type="submit">Search</button>
+    </div>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a class="saved-resource-filter @(Model.SavedOnly ? "is-active" : "")" href="@ExplorerUrl(savedOnly: !Model.SavedOnly)" aria-pressed="@Model.SavedOnly"><span aria-hidden="true">▱</span> Saved</a>
+    }
+    else
+    {
+        <a class="saved-resource-filter" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@ExplorerUrl(savedOnly: true)"><span aria-hidden="true">▱</span> Saved</a>
+    }
+
+    <label class="visually-hidden" for="resource-semester">Semester</label>
+    <select id="resource-semester" name="semester" class="resource-sort-select" onchange="this.form.submit()">
+        <option value="">All semesters</option>
+        @foreach (var semester in Model.Semesters) { <option value="@semester" selected="@(semester == Model.Semester)">@semester</option> }
+    </select>
+    <label class="visually-hidden" for="resource-sort">Sort resources</label>
+    <select id="resource-sort" name="sort" class="resource-sort-select" onchange="this.form.submit()">
+        <option value="Quality" selected="@(Model.Sort == "Quality")">Highest quality</option>
+        <option value="MostHelpful" selected="@(Model.Sort == "MostHelpful")">Most helpful</option>
+        <option value="Newest" selected="@(Model.Sort == "Newest")">Most recent</option>
+    </select>
+</form>
+
+<p class="resource-results-meta">
+    <strong>@Model.TotalCount</strong> @(Model.TotalCount == 1 ? "resource" : "resources") across @Model.ScopeLabel
+    @if (!string.IsNullOrWhiteSpace(Model.Type)) { <span>· @Model.ResourceTypes.FirstOrDefault(x => x.IsSelected)?.Label</span> }
+    @if (Model.SavedOnly) { <span>· Saved only</span> }
+</p>
+
+@if (Model.Resources.Count == 0)
+{
+    <section class="prototype-empty-state">
+        <span class="empty-state-icon" aria-hidden="true">@(Model.SavedOnly ? "▱" : "⌕")</span>
+        <h2>@(Model.SavedOnly ? "No saved resources here" : "No matching resources")</h2>
+        <p>@(Model.SavedOnly ? "Save useful material and it will appear in this view." : "Try another keyword or category. You can also request what you need from the community.")</p>
+        @if (Model.SavedOnly) { <a class="prototype-primary-action" href="@ExplorerUrl(savedOnly: false)">Show all resources</a> }
+        else { <a class="prototype-primary-action" asp-controller="Community" asp-action="Create" asp-route-courseId="@Model.SelectedCourseIds.FirstOrDefault()">Request a resource</a> }
+    </section>
+}
+else
+{
+    <section class="quality-resource-grid" aria-label="Resource results">
+        @foreach (var resource in Model.Resources)
+        {
+            <partial name="_ExplorerResourceCard" model="resource" />
+        }
+    </section>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="prototype-pagination" aria-label="Resource results pages">
+            <a class="@(Model.Page <= 1 ? "is-disabled" : "")" href="@(Model.Page <= 1 ? null : ExplorerUrl(pageNumber: Model.Page - 1))">Previous</a>
+            @for (var pageNumber = Math.Max(1, Model.Page - 2); pageNumber <= Math.Min(Model.TotalPages, Model.Page + 2); pageNumber++)
+            {
+                <a class="@(pageNumber == Model.Page ? "is-current" : "")" href="@ExplorerUrl(pageNumber: pageNumber)" aria-current="@(pageNumber == Model.Page ? "page" : null)">@pageNumber</a>
+            }
+            <a class="@(Model.Page >= Model.TotalPages ? "is-disabled" : "")" href="@(Model.Page >= Model.TotalPages ? null : ExplorerUrl(pageNumber: Model.Page + 1))">Next</a>
+        </nav>
+    }
+}

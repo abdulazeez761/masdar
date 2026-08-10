@@ -1,0 +1,17 @@
+@model int
+@{
+    var title = Model switch { 403 => "Access denied", 404 => "Page not found", _ => "Request could not be completed" };
+    var message = Model switch
+    {
+        403 => "You do not have permission to open this page.",
+        404 => "The page or resource may have moved, been archived, or never existed.",
+        _ => "Please return to the workspace and try again."
+    };
+    ViewData["Title"] = title;
+}
+<section class="empty-state card status-card">
+    <span class="eyebrow">Error @Model</span>
+    <h1>@title</h1>
+    <p>@message</p>
+    <div class="form-actions"><a class="btn btn-primary" asp-controller="Home" asp-action="Index">Return home</a><a class="btn btn-secondary" href="javascript:history.back()">Go back</a></div>
+</section>

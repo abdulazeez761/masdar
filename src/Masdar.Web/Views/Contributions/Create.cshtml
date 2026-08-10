@@ -1,0 +1,51 @@
+@model Masdar.Web.ViewModels.ContributionCreateViewModel
+@{
+    ViewData["Title"] = "Contribute a resource";
+}
+
+<header class="page-head">
+    <div><div class="eyebrow">Students help students</div><h1>Contribute a resource</h1><p>Share a useful course document with enough context for students to find and trust it.</p></div>
+</header>
+
+<div class="row g-4 upload-workspace">
+    <div class="col-lg-8">
+        <form asp-action="Create" method="post" enctype="multipart/form-data" class="card p-4" novalidate>
+            @Html.AntiForgeryToken()
+            <input asp-for="RequestId" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <section aria-labelledby="file-heading" class="mb-4">
+                <div class="wizard-header"><span class="badge badge-blue">Step 1</span><h2 id="file-heading" class="h5 mt-2">Choose your file</h2><p>PDF and DOCX only, up to 10 MB.</p></div>
+                <div class="field"><label asp-for="File" class="form-label"></label><input asp-for="File" class="form-control" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-describedby="file-help" /><div id="file-help" class="form-text">Use a clear original document. Executables and password-protected archives are not accepted.</div><span asp-validation-for="File" class="text-danger"></span></div>
+            </section>
+
+            <section aria-labelledby="metadata-heading" class="mb-4 border-top pt-4">
+                <div class="wizard-header"><span class="badge badge-blue">Step 2</span><h2 id="metadata-heading" class="h5 mt-2">Describe the resource</h2><p>Accurate metadata makes search and course-aware tutoring more useful.</p></div>
+                <div class="row g-3">
+                    <div class="col-md-6 field"><label asp-for="CourseId" class="form-label"></label><select asp-for="CourseId" asp-items="Model.Courses" class="form-select"><option value="">Choose a course</option></select><span asp-validation-for="CourseId" class="text-danger"></span></div>
+                    <div class="col-md-6 field"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Model.Types" class="form-select"><option value="">Choose a type</option></select><span asp-validation-for="Type" class="text-danger"></span></div>
+                    <div class="col-12 field"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control" placeholder="e.g. Midterm Exam 2025 — Solved" /><span asp-validation-for="Title" class="text-danger"></span></div>
+                    <div class="col-md-5 field"><label asp-for="Semester" class="form-label"></label><input asp-for="Semester" class="form-control" placeholder="Spring 2026" /><span asp-validation-for="Semester" class="text-danger"></span></div>
+                    <div class="col-md-7 field"><label asp-for="Tags" class="form-label"></label><input asp-for="Tags" class="form-control" placeholder="integration, series, midterm" /><div class="form-text">Separate up to ten short tags with commas.</div><span asp-validation-for="Tags" class="text-danger"></span></div>
+                    <div class="col-12 field"><label asp-for="Description" class="form-label"></label><textarea asp-for="Description" class="form-control" rows="4" placeholder="What is covered, and how should students use it?"></textarea><span asp-validation-for="Description" class="text-danger"></span></div>
+                    <div class="col-12 field"><label asp-for="TutorContext" class="form-label"></label><textarea asp-for="TutorContext" class="form-control" rows="5" placeholder="Optional plain-text summary or key concepts that the tutor can cite."></textarea><span asp-validation-for="TutorContext" class="text-danger"></span></div>
+                </div>
+            </section>
+
+            <section aria-labelledby="consent-heading" class="border-top pt-4">
+                <div class="wizard-header"><span class="badge badge-blue">Step 3</span><h2 id="consent-heading" class="h5 mt-2">Review and publish</h2></div>
+                <div class="form-check"><input asp-for="HasSharingConsent" class="form-check-input" /><label asp-for="HasSharingConsent" class="form-check-label">I created this material or have permission to share it, and it contains no private personal information.</label></div><span asp-validation-for="HasSharingConsent" class="text-danger d-block"></span>
+                <div class="d-flex gap-2 mt-4"><button class="btn btn-primary" type="submit">Submit resource</button><a class="btn btn-secondary" asp-controller="Resources" asp-action="Index">Cancel</a></div>
+            </section>
+        </form>
+    </div>
+    <aside class="col-lg-4">
+        <div class="card p-4 position-sticky" style="top:6rem">
+            <h2 class="h5">Before you upload</h2>
+            <ul class="small text-muted ps-3"><li>Remove student IDs, grades, and contact details.</li><li>Use a descriptive title and the correct semester.</li><li>Do not upload copyrighted textbooks or paid course packs.</li><li>Submissions enter community review before becoming verified.</li></ul>
+            @if (Model.RequestId.HasValue) { <div class="alert alert-info mb-0">This upload will fulfill community request #@Model.RequestId after it is accepted.</div> }
+        </div>
+    </aside>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

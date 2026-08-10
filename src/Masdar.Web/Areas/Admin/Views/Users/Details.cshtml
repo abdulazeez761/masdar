@@ -1,0 +1,22 @@
+@model ApplicationUser
+@{
+    ViewData["Title"] = "User details";
+    var roles = ViewBag.Roles as IList<string> ?? Array.Empty<string>();
+    var transactions = ViewBag.Reputation as IReadOnlyList<ReputationTransaction> ?? Array.Empty<ReputationTransaction>();
+}
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">User account</span><h1>@Model.DisplayName</h1><p>@Model.Email · joined @Model.CreatedAtUtc.ToString("d")</p></div><a class="btn btn-secondary" asp-action="Index">Back to users</a></header>
+<div class="admin-grid">
+    <section class="card admin-panel">
+        <h2>Account</h2>
+        <dl class="detail-list"><div><dt>Status</dt><dd>@(Model.IsActive ? "Active" : "Inactive")</dd></div><div><dt>Role</dt><dd>@string.Join(", ", roles)</dd></div><div><dt>University</dt><dd>@(Model.University?.Name ?? "Not set")</dd></div><div><dt>Major</dt><dd>@(Model.Major?.Name ?? "Not set")</dd></div><div><dt>Resources</dt><dd>@Model.UploadedResources.Count</dd></div><div><dt>Requests</dt><dd>@Model.ResourceRequests.Count</dd></div></dl>
+        <div class="form-actions">
+            <form asp-action="ToggleActive" asp-route-id="@Model.Id" method="post"><button class="btn @(Model.IsActive ? "btn-danger" : "btn-primary")" type="submit">@(Model.IsActive ? "Deactivate" : "Activate") account</button></form>
+            <form asp-action="SetRole" asp-route-id="@Model.Id" method="post"><input type="hidden" name="role" value="@(roles.Contains("Admin") ? "User" : "Admin")" /><button class="btn btn-secondary" type="submit">Make @(roles.Contains("Admin") ? "User" : "Admin")</button></form>
+        </div>
+    </section>
+    <section class="card admin-panel"><h2>Reputation ledger</h2>
+        @if (transactions.Count == 0) { <p class="empty-copy">No reputation transactions.</p> }
+        @foreach (var tx in transactions) { <div class="admin-list-row"><span><strong>@tx.Reason</strong><small>@tx.CreatedAtUtc.ToLocalTime().ToString("g")</small></span><strong class="@(tx.Points >= 0 ? "text-success" : "text-danger")">@(tx.Points >= 0 ? "+" : "")@tx.Points</strong></div> }
+    </section>
+</div>

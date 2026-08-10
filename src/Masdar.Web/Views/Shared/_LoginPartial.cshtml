@@ -1,0 +1,71 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Masdar.Web.Domain.Entities.ApplicationUser> LoginUserManager
+@{
+    var isSignedIn = User.Identity?.IsAuthenticated == true;
+    var applicationUser = isSignedIn ? await LoginUserManager.GetUserAsync(User) : null;
+    var identityName = User.Identity?.Name ?? "Student";
+    var fallbackName = identityName.Contains('@')
+        ? identityName.Split('@', StringSplitOptions.RemoveEmptyEntries)[0]
+        : identityName;
+    var displayName = applicationUser?.DisplayName ?? fallbackName;
+    displayName = string.IsNullOrWhiteSpace(displayName) ? "Student" : displayName;
+    var avatarInitial = displayName[..1].ToUpperInvariant();
+    var roleLabel = User.IsInRole("Admin") ? "Administrator" : "Student";
+    var accountSubtitle = applicationUser is null ? roleLabel : $"{applicationUser.ReputationBalance:N0} reputation points";
+}
+
+@if (isSignedIn)
+{
+    <div class="user-menu dropdown">
+        <button class="user-menu-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open account menu">
+            <span class="avatar" aria-hidden="true">@avatarInitial</span>
+            <span class="user-copy">
+                <strong>@displayName</strong>
+                <span>@accountSubtitle</span>
+            </span>
+            <svg class="user-chevron" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end account-menu">
+            <li class="account-menu-heading">
+                <span class="avatar avatar-small" aria-hidden="true">@avatarInitial</span>
+                <span><strong>@displayName</strong><small>@identityName</small></span>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <a class="dropdown-item" asp-area="" asp-controller="Profile" asp-action="Index">
+                    <svg aria-hidden="true"><use href="#icon-user"></use></svg><span data-i18n="myProfile">My profile</span>
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                    <svg aria-hidden="true"><use href="#icon-settings"></use></svg><span data-i18n="accountSettings">Account settings</span>
+                </a>
+            </li>
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                        <svg aria-hidden="true"><use href="#icon-shield"></use></svg><span data-i18n="administration">Administration</span>
+                    </a>
+                </li>
+            }
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                    <button class="dropdown-item dropdown-item-danger" type="submit">
+                        <svg aria-hidden="true"><use href="#icon-log-out"></use></svg><span data-i18n="signOut">Sign out</span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <div class="auth-actions">
+        <a class="btn btn-ghost auth-register" asp-area="Identity" asp-page="/Account/Register" data-i18n="createAccount">Create account</a>
+        <a class="btn btn-primary auth-login" asp-area="Identity" asp-page="/Account/Login">
+            <svg aria-hidden="true"><use href="#icon-log-in"></use></svg><span data-i18n="signIn">Sign in</span>
+        </a>
+    </div>
+}

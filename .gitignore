@@ -1,0 +1,30 @@
+# Build output
+**/bin/
+**/obj/
+artifacts/
+
+# Local databases and user-generated files
+*.db
+*.db-shm
+*.db-wal
+src/Masdar.Web/wwwroot/uploads/**
+!src/Masdar.Web/wwwroot/uploads/.gitkeep
+src/Masdar.Web/App_Data/
+
+# User-specific IDE state
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Local configuration and secrets
+appsettings.Local.json
+secrets.json
+
+# Test output
+TestResults/
+coverage/
+
+# Operating-system files
+.DS_Store
+Thumbs.db

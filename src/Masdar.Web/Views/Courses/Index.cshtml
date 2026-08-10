@@ -1,0 +1,77 @@
+@model Masdar.Web.ViewModels.CourseCatalogViewModel
+@{
+    ViewData["Title"] = "Course catalog";
+    ViewData["BodyClass"] = "prototype-study-page";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/prototype-pages.css" asp-append-version="true" /> }
+
+<header class="prototype-page-head course-catalog-head">
+    <div>
+        <div class="prototype-eyebrow">All courses <span>/</span> <span lang="ar" dir="rtl">الكورسات</span></div>
+        <h1>Find your course</h1>
+        <p>Choose your academic context or search by course code, title, or instructor.</p>
+    </div>
+    <a class="prototype-secondary-action" asp-controller="Resources" asp-action="Index"><span aria-hidden="true">⌕</span> Explore resources</a>
+</header>
+
+<form method="get" asp-action="Index" class="course-catalog-filter" aria-label="Course catalog filters">
+    <div class="catalog-search-field">
+        <label for="course-search">Search courses</label>
+        <div><span aria-hidden="true">⌕</span><input id="course-search" type="search" name="search" value="@Model.Search" placeholder="Try MATH 201, algorithms, or an instructor…" /></div>
+    </div>
+    <div class="context-field">
+        <label for="university-filter">University</label>
+        <select id="university-filter" name="universityId" asp-items="Model.Universities"><option value="">All universities</option></select>
+    </div>
+    <div class="context-field">
+        <label for="major-filter">Major</label>
+        <select id="major-filter" name="majorId" asp-items="Model.Majors"><option value="">All majors</option></select>
+    </div>
+    <button type="submit">Find courses</button>
+</form>
+
+<div class="catalog-results-heading">
+    <div><h2>@Model.TotalCount @(Model.TotalCount == 1 ? "course" : "courses")</h2><p>Open a course to see its materials, roadmap, tutor, and opportunities.</p></div>
+    @if (!string.IsNullOrWhiteSpace(Model.Search) || Model.UniversityId.HasValue || Model.MajorId.HasValue) { <a asp-action="Index">Clear filters</a> }
+</div>
+
+@if (Model.Courses.Count == 0)
+{
+    <section class="prototype-empty-state"><span class="empty-state-icon" aria-hidden="true">⌕</span><h2>No matching courses</h2><p>Try another course code or remove one of the academic filters.</p><a class="prototype-primary-action" asp-action="Index">Show all courses</a></section>
+}
+else
+{
+    <section class="course-catalog-grid" aria-label="Course catalog results">
+        @foreach (var course in Model.Courses)
+        {
+            <article class="catalog-course-card @(course.IsActive ? "is-active" : "")">
+                <div class="catalog-course-top">
+                    <span class="catalog-course-symbol" aria-hidden="true">@course.Code.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Substring(0, Math.Min(2, course.Code.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Length ?? 0))</span>
+                    <div class="catalog-course-badges"><span>@course.Code</span>@if (course.IsActive) { <em>Active course</em> }</div>
+                </div>
+                <h2><a asp-action="Details" asp-route-id="@course.Id">@course.Name</a></h2>
+                <p class="catalog-academic-line">@course.University</p>
+                <p class="catalog-course-meta">@course.Major · @course.Instructor</p>
+                <div class="catalog-course-stats">
+                    <span><strong>@course.ResourceCount</strong> trusted materials</span>
+                    <span><strong>@course.ProgressPercent%</strong> roadmap</span>
+                </div>
+                <span class="catalog-progress" aria-hidden="true"><i style="width:@course.ProgressPercent%"></i></span>
+                <a class="catalog-open-course" asp-action="Details" asp-route-id="@course.Id">Open course workspace <span aria-hidden="true">→</span></a>
+            </article>
+        }
+    </section>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="prototype-pagination" aria-label="Course result pages">
+            <a class="@(Model.Page <= 1 ? "is-disabled" : "")" asp-route-page="@(Model.Page - 1)" asp-route-search="@Model.Search" asp-route-universityId="@Model.UniversityId" asp-route-majorId="@Model.MajorId">Previous</a>
+            @for (var pageNumber = Math.Max(1, Model.Page - 2); pageNumber <= Math.Min(Model.TotalPages, Model.Page + 2); pageNumber++)
+            {
+                <a class="@(pageNumber == Model.Page ? "is-current" : "")" asp-route-page="@pageNumber" asp-route-search="@Model.Search" asp-route-universityId="@Model.UniversityId" asp-route-majorId="@Model.MajorId" aria-current="@(pageNumber == Model.Page ? "page" : null)">@pageNumber</a>
+            }
+            <a class="@(Model.Page >= Model.TotalPages ? "is-disabled" : "")" asp-route-page="@(Model.Page + 1)" asp-route-search="@Model.Search" asp-route-universityId="@Model.UniversityId" asp-route-majorId="@Model.MajorId">Next</a>
+        </nav>
+    }
+}

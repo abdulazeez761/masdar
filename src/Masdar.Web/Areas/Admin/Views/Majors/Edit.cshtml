@@ -1,0 +1,6 @@
+@model MajorInputModel
+@{ ViewData["Title"] = Model.Id == 0 ? "Add major" : "Edit major"; var universities = ViewBag.Universities as IReadOnlyList<University> ?? Array.Empty<University>(); }
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">Academic catalog</span><h1>@ViewData["Title"]</h1><p>Associate the program with the correct institution.</p></div></header>
+<form method="post" class="card edit-form"><input asp-for="Id" type="hidden" /><div asp-validation-summary="ModelOnly" class="validation-summary"></div><div class="form-grid"><div class="field"><label asp-for="UniversityId">University</label><select asp-for="UniversityId"><option value="">Select university</option>@foreach(var item in universities){<option value="@item.Id">@item.Name</option>}</select><span asp-validation-for="UniversityId"></span></div><div class="field"><label asp-for="Name"></label><input asp-for="Name" /><span asp-validation-for="Name"></span></div><label class="check-row"><input asp-for="IsActive" /> Active</label></div><div class="form-actions"><a class="btn btn-secondary" asp-action="Index">Cancel</a><button class="btn btn-primary" type="submit">Save major</button></div></form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

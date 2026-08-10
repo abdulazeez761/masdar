@@ -1,0 +1,8 @@
+@model IReadOnlyList<StudyResource>
+@{ ViewData["Title"] = "Resource moderation"; }
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">Trust and quality</span><h1>Resources</h1><p>Review publication, verification, and representative-course signals.</p></div></header>
+<form method="get" class="card filter-bar"><input type="search" name="query" value="@ViewBag.Query" placeholder="Title, course, or uploader" /><select name="status"><option value="">All statuses</option>@foreach(var item in Enum.GetValues<ResourcePublicationStatus>()){<option value="@item" selected="@(Equals(ViewBag.Status, item))">@item</option>}</select><label class="form-check"><input class="form-check-input" type="checkbox" name="attention" value="true" checked="@(ViewBag.Attention == true)" /><span>Needs attention</span></label><button class="btn btn-primary" type="submit">Filter</button></form>
+<div class="card table-shell"><table class="data-table"><thead><tr><th>Resource</th><th>Course</th><th>Uploader</th><th>Quality</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var item in Model) { <tr><td><strong>@item.Title</strong><small>@item.Type · @item.CreatedAtUtc.ToString("d")</small></td><td>@item.Course.Code</td><td>@item.Uploader.DisplayName</td><td><span class="badge @(item.VerificationStatus == ResourceVerificationStatus.Verified ? "badge-green" : "badge-gray")">@item.VerificationStatus</span></td><td>@item.PublicationStatus</td><td><a class="btn btn-secondary btn-small" asp-action="Details" asp-route-id="@item.Id">Review</a></td></tr> }
+</tbody></table></div>

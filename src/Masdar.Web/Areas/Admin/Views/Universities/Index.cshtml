@@ -1,0 +1,8 @@
+@model IReadOnlyList<University>
+@{ ViewData["Title"] = "Universities"; }
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">Academic catalog</span><h1>Universities</h1><p>Manage institutions and their academic programs.</p></div><a class="btn btn-primary" asp-action="Create">Add university</a></header>
+<form method="get" class="card filter-bar"><input type="search" name="query" value="@ViewBag.Query" placeholder="Search universities" /><button class="btn btn-primary" type="submit">Search</button></form>
+<div class="card table-shell"><table class="data-table"><thead><tr><th>Name</th><th>Location</th><th>Majors</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var item in Model) { <tr><td><strong>@item.Name</strong><small>@item.WebsiteUrl</small></td><td>@(item.Location ?? "—")</td><td>@item.Majors.Count</td><td><span class="badge @(item.IsActive ? "badge-green" : "badge-gray")">@(item.IsActive ? "Active" : "Inactive")</span></td><td><div class="table-actions"><a class="btn btn-secondary btn-small" asp-action="Edit" asp-route-id="@item.Id">Edit</a><a class="btn btn-secondary btn-small" asp-controller="Majors" asp-route-universityId="@item.Id">Majors</a><form asp-action="Toggle" asp-route-id="@item.Id" method="post"><button class="btn btn-soft btn-small" type="submit">@(item.IsActive ? "Deactivate" : "Activate")</button></form></div></td></tr> }
+</tbody></table></div>

@@ -1,0 +1,23 @@
+@model Masdar.Web.ViewModels.CreateResourceRequestViewModel
+@{
+    ViewData["Title"] = "Request a resource";
+}
+
+<header class="page-head"><div><div class="eyebrow">Ask the community</div><h1>Request a resource</h1><p>Describe exactly what you need. A clear request is easier to fulfill and earns better matches.</p></div></header>
+
+<div class="row justify-content-center"><div class="col-lg-8">
+    <form asp-action="Create" method="post" class="card p-4">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <div class="row g-3">
+            <div class="col-md-6 field"><label asp-for="CourseId" class="form-label"></label><select asp-for="CourseId" asp-items="Model.Courses" class="form-select"><option value="">Choose a course</option></select><span asp-validation-for="CourseId" class="text-danger"></span></div>
+            <div class="col-md-6 field"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Model.Types" class="form-select"><option value="">Choose a type</option></select><span asp-validation-for="Type" class="text-danger"></span></div>
+            <div class="col-12 field"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control" placeholder="e.g. Second exam with worked solutions" /><span asp-validation-for="Title" class="text-danger"></span></div>
+            <div class="col-12 field"><label asp-for="Notes" class="form-label"></label><textarea asp-for="Notes" rows="4" class="form-control" placeholder="Topics, instructor, semester, or format that would help contributors match it."></textarea><span asp-validation-for="Notes" class="text-danger"></span></div>
+            <div class="col-md-6 field"><label asp-for="BountyPoints" class="form-label"></label><select asp-for="BountyPoints" class="form-select"><option value="20">20 points</option><option value="40">40 points</option><option value="80">80 points</option></select><div class="form-text">The bounty is reserved from your reputation and awarded on fulfillment.</div><span asp-validation-for="BountyPoints" class="text-danger"></span></div>
+        </div>
+        <div class="d-flex gap-2 mt-4"><button class="btn btn-primary" type="submit">Post request</button><a class="btn btn-secondary" asp-action="Index">Cancel</a></div>
+    </form>
+</div></div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

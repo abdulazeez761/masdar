@@ -1,0 +1,8 @@
+@model IReadOnlyList<ActivityLog>
+@{ ViewData["Title"] = "Audit log"; }
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">Accountability</span><h1>Audit log</h1><p>Review important platform and moderation actions.</p></div></header>
+<form method="get" class="card filter-bar"><input type="search" name="query" value="@ViewBag.Query" placeholder="Action, entity, or description" /><button class="btn btn-primary" type="submit">Search</button></form>
+<div class="card table-shell"><table class="data-table"><thead><tr><th>Time</th><th>Action</th><th>Actor</th><th>Target</th><th>Description</th></tr></thead><tbody>
+@foreach (var item in Model) { <tr><td>@item.CreatedAtUtc.ToLocalTime().ToString("g")</td><td><strong>@item.Action</strong></td><td>@(item.ActorUser?.DisplayName ?? "System")</td><td>@item.EntityType @item.EntityId</td><td>@item.Description</td></tr> }
+</tbody></table></div>

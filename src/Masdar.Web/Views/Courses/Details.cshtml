@@ -1,0 +1,214 @@
+@model Masdar.Web.ViewModels.CourseDetailsViewModel
+@{
+    ViewData["Title"] = $"{Model.Course.Code} · {Model.Course.Name}";
+    ViewData["BodyClass"] = "prototype-study-page";
+    ViewData["ActiveCourseCode"] = Model.Course.Code;
+    ViewData["ActiveCourseName"] = Model.Course.Name;
+    var isMaterials = Model.Tab is "resources" or "materials";
+    var nextNode = Model.Roadmap.FirstOrDefault(x => !x.IsCompleted);
+    var examDateLabel = Model.Course.ExamDate?.ToString("MMM d");
+    var tutorReturnUrl = Url.Action("Index", "Tutor") ?? "/Tutor";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/prototype-pages.css" asp-append-version="true" /> }
+
+<section class="prototype-course-hero" aria-labelledby="course-title">
+    <div class="prototype-course-hero-grid">
+        <div>
+            <nav class="course-hero-breadcrumb" aria-label="Breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span aria-hidden="true">›</span><a asp-action="Index">Courses</a><span aria-hidden="true">›</span><span>@Model.Course.Code</span></nav>
+            <span class="course-semester-badge">@Model.Course.Semester</span>
+            <h1 id="course-title">@Model.Course.Name</h1>
+            <p>@Model.Course.Code · @Model.Course.Instructor · @Model.Course.ResourceCount trusted resources@if (!string.IsNullOrWhiteSpace(examDateLabel)) { <span> · Exam @examDateLabel</span> }</p>
+            <div class="prototype-course-actions">
+                @if (User.Identity?.IsAuthenticated == true && !Model.Course.IsActive)
+                {
+                    <form asp-action="SetActive" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Course.Id" />
+                        <input type="hidden" name="returnUrl" value="@tutorReturnUrl" />
+                        <button class="course-tutor-button" type="submit"><span aria-hidden="true">✦</span> Make active &amp; ask tutor</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="course-tutor-button" asp-controller="Tutor" asp-action="Index"><span aria-hidden="true">✦</span> Ask course tutor</a>
+                }
+                <a class="course-material-button" asp-controller="Resources" asp-action="Index" asp-route-courseId="@Model.Course.Id"><span aria-hidden="true">▤</span> Browse materials</a>
+                @if (User.Identity?.IsAuthenticated == true && !Model.Course.IsActive)
+                {
+                    <form asp-action="SetActive" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.Course.Id" /><button type="submit">Make active</button></form>
+                }
+            </div>
+        </div>
+        <div class="prototype-progress-ring" style="--course-progress:@Model.Course.ProgressPercent" role="img" aria-label="Course roadmap @Model.Course.ProgressPercent percent complete">
+            <div><strong>@Model.Course.ProgressPercent%</strong><span>complete</span></div>
+        </div>
+    </div>
+</section>
+
+<nav class="prototype-course-tabs" aria-label="Course workspace">
+    <a class="@(Model.Tab == "overview" ? "is-active" : "")" asp-action="Details" asp-route-id="@Model.Course.Id" asp-route-tab="overview" aria-current="@(Model.Tab == "overview" ? "page" : null)"><span aria-hidden="true">▦</span> Overview</a>
+    <a class="@(isMaterials ? "is-active" : "")" asp-action="Details" asp-route-id="@Model.Course.Id" asp-route-tab="resources" aria-current="@(isMaterials ? "page" : null)"><span aria-hidden="true">▤</span> Materials</a>
+    <a class="@(Model.Tab == "roadmap" ? "is-active" : "")" asp-action="Details" asp-route-id="@Model.Course.Id" asp-route-tab="roadmap" aria-current="@(Model.Tab == "roadmap" ? "page" : null)"><span aria-hidden="true">⌁</span> Roadmap</a>
+    <a class="@(Model.Tab == "career" ? "is-active" : "")" asp-action="Details" asp-route-id="@Model.Course.Id" asp-route-tab="career" aria-current="@(Model.Tab == "career" ? "page" : null)"><span aria-hidden="true">▣</span> Career relevance</a>
+</nav>
+
+@if (isMaterials)
+{
+    <section aria-labelledby="course-materials-title">
+        <div class="prototype-section-head no-top-margin"><div><h2 id="course-materials-title">@Model.Resources.Count course resources</h2><p>Compare quality before you spend time reading.</p></div><div><a class="section-text-link" asp-controller="Resources" asp-action="Index" asp-route-courseId="@Model.Course.Id">Search &amp; filter</a><a class="prototype-primary-action compact" asp-controller="Contributions" asp-action="Create" asp-route-courseId="@Model.Course.Id">↥ Add resource</a></div></div>
+        @if (Model.Resources.Count == 0)
+        {
+            <div class="prototype-empty-state"><span class="empty-state-icon" aria-hidden="true">▤</span><h2>No resources yet</h2><p>Be the first to contribute a useful PDF or DOCX to this course.</p><a class="prototype-primary-action" asp-controller="Contributions" asp-action="Create" asp-route-courseId="@Model.Course.Id">Upload resource</a></div>
+        }
+        else
+        {
+            <div class="course-material-grid">
+                @foreach (var resource in Model.Resources)
+                {
+                    <article class="course-material-card">
+                        <div><span class="course-material-type">@resource.Type</span>@if (resource.IsVerified) { <span class="course-material-verified">✓ Verified</span> }</div>
+                        <h3><a asp-controller="Resources" asp-action="Details" asp-route-id="@resource.Id">@resource.Title</a></h3>
+                        <p>@resource.Semester · Shared by @resource.UploaderName</p>
+                        <div class="course-material-tags">@foreach (var tag in resource.Tags.Take(3)) { <span>#@tag</span> }</div>
+                        <div class="course-material-quality"><span><strong>@(resource.RatingCount == 0 ? "New" : resource.AverageRating.ToString("0.0"))</strong> · @resource.RatingCount ratings</span><span>@resource.HelpfulCount helpful</span></div>
+                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@resource.Id">Preview resource <span aria-hidden="true">→</span></a>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}
+else if (Model.Tab == "roadmap")
+{
+    <section aria-labelledby="roadmap-title">
+        <div class="prototype-section-head no-top-margin"><div><h2 id="roadmap-title">Smart course roadmap</h2><p>A guided path shaped by difficulty and exam importance. Your progress stays private.</p></div><span class="roadmap-completion-copy">@Model.Roadmap.Count(x => x.IsCompleted) of @Model.Roadmap.Count complete</span></div>
+        @if (Model.Roadmap.Count == 0)
+        {
+            <div class="prototype-empty-state"><span class="empty-state-icon" aria-hidden="true">⌁</span><h2>Roadmap coming soon</h2><p>The course path has not been mapped yet.</p></div>
+        }
+        else
+        {
+            <div class="prototype-roadmap-list">
+                @foreach (var node in Model.Roadmap)
+                {
+                    <article class="prototype-roadmap-node @(node.IsCompleted ? "is-complete" : "")">
+                        <span class="roadmap-status-icon" aria-hidden="true">@(node.IsCompleted ? "✓" : node.SortOrder.ToString())</span>
+                        <div><h3>@node.SortOrder. @node.Title</h3><p>@node.Description</p><div><span class="roadmap-difficulty difficulty-@node.Difficulty.ToLowerInvariant()">@node.Difficulty</span><span class="roadmap-weight">@node.WeightPercent% exam weight</span></div></div>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form asp-action="ToggleRoadmap" method="post">@Html.AntiForgeryToken()<input type="hidden" name="courseId" value="@Model.Course.Id" /><input type="hidden" name="roadmapNodeId" value="@node.Id" /><button type="submit">@(node.IsCompleted ? "Mark incomplete" : "Mark complete")</button></form>
+                        }
+                        else { <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString">Sign in to track</a> }
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}
+else if (Model.Tab == "career")
+{
+    <section aria-labelledby="career-title">
+        <div class="prototype-section-head no-top-margin"><div><h2 id="career-title">Why this course matters</h2><p>Connect academic concepts to real systems and career paths.</p></div></div>
+        @if (Model.CareerConnections.Count == 0)
+        {
+            <div class="prototype-empty-state"><span class="empty-state-icon" aria-hidden="true">▣</span><h2>Career mapping coming soon</h2><p>We are connecting this course to practical applications.</p></div>
+        }
+        else
+        {
+            <div class="prototype-career-grid">
+                @foreach (var item in Model.CareerConnections)
+                {
+                    <article class="prototype-career-card"><span aria-hidden="true">◇</span><h3>@item.Title</h3><p>@item.Description</p></article>
+                }
+            </div>
+        }
+    </section>
+
+    <section aria-labelledby="opportunities-title">
+        <div class="prototype-section-head"><div><h2 id="opportunities-title">Opportunities for students</h2><p>Apply what you learn beyond the classroom.</p></div></div>
+        @if (Model.Opportunities.Count == 0)
+        {
+            <div class="prototype-empty-state compact-empty"><h2>No upcoming opportunities</h2><p>New workshops, competitions, and internships will appear here.</p></div>
+        }
+        else
+        {
+            <div class="prototype-opportunity-grid">
+                @foreach (var opportunity in Model.Opportunities)
+                {
+                    <article class="prototype-opportunity-card">
+                        <div><span>@opportunity.Type</span><time datetime="@opportunity.StartsAtUtc.ToString("O")">@opportunity.StartsAtUtc.ToLocalTime().ToString("MMM d, yyyy")</time></div>
+                        <h3>@opportunity.Title</h3><p>@opportunity.Description</p><small>@opportunity.Location · @opportunity.RegistrationCount interested</small>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form asp-action="ToggleOpportunity" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@opportunity.Id" /><input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" /><button class="@(opportunity.IsRegistered ? "is-registered" : "")" type="submit">@(opportunity.IsRegistered ? "✓ Registered · Cancel" : "Register interest")</button></form>
+                        }
+                        else { <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString">Sign in to register</a> }
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}
+else
+{
+    <section class="prototype-overview-grid">
+        <article class="course-focus-card">
+            <div class="prototype-card-kicker">Next exam focus</div>
+            <h2>Focus for your next exam</h2><p>Prioritized using exam weight and your roadmap progress.</p>
+            <div class="course-focus-list">
+                @if (nextNode is null)
+                {
+                    <div class="focus-complete-state"><span aria-hidden="true">✓</span><div><strong>Current roadmap complete</strong><small>Review your course resources or revisit any topic.</small></div></div>
+                }
+                @{ var focusIndex = 0; }
+                @foreach (var node in Model.Roadmap.Where(x => !x.IsCompleted).Take(3))
+                {
+                    focusIndex++;
+                    <div class="course-focus-item"><span>@focusIndex</span><div><strong>@node.Title</strong><small>@node.Difficulty · @node.WeightPercent% exam weight</small></div></div>
+                }
+            </div>
+            @if (nextNode is not null) { <a asp-action="Details" asp-route-id="@Model.Course.Id" asp-route-tab="roadmap">Open roadmap <span aria-hidden="true">→</span></a> }
+        </article>
+
+        <article class="course-ai-card">
+            <span class="course-ai-icon" aria-hidden="true">✦</span><h2>Ask questions in course context</h2><p>The tutor retrieves answers from uploaded @Model.Course.Code materials and shows the sources it used.</p>
+            @if (User.Identity?.IsAuthenticated == true && !Model.Course.IsActive)
+            {
+                <form class="course-ai-activate" asp-action="SetActive" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Course.Id" />
+                    <input type="hidden" name="returnUrl" value="@tutorReturnUrl" />
+                    <button type="submit">Make active &amp; start a conversation</button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Tutor" asp-action="Index">Start a conversation</a>
+            }
+        </article>
+    </section>
+
+    <section aria-labelledby="top-resources-title">
+        <div class="prototype-section-head"><div><h2 id="top-resources-title">Top resources for this course</h2><p>Community-ranked and verified.</p></div><a class="section-text-link" asp-action="Details" asp-route-id="@Model.Course.Id" asp-route-tab="resources">View all <span aria-hidden="true">→</span></a></div>
+        @if (Model.Resources.Count == 0)
+        {
+            <div class="prototype-empty-state compact-empty"><h2>No published resources yet</h2><p>Share the first useful material for this course.</p><a class="prototype-primary-action compact" asp-controller="Contributions" asp-action="Create" asp-route-courseId="@Model.Course.Id">Add resource</a></div>
+        }
+        else
+        {
+            <div class="course-material-grid top-resources-grid">
+                @foreach (var resource in Model.Resources.Take(3))
+                {
+                    <article class="course-material-card">
+                        <div><span class="course-material-type">@resource.Type</span>@if (resource.IsVerified) { <span class="course-material-verified">✓ Verified</span> }</div>
+                        <h3><a asp-controller="Resources" asp-action="Details" asp-route-id="@resource.Id">@resource.Title</a></h3><p>@resource.Semester · @resource.UploaderName</p>
+                        <div class="course-material-tags">@foreach (var tag in resource.Tags.Take(3)) { <span>#@tag</span> }</div>
+                        <div class="course-material-quality"><span><strong>@(resource.RatingCount == 0 ? "New" : resource.AverageRating.ToString("0.0"))</strong> · @resource.RatingCount ratings</span><span>@resource.HelpfulCount helpful</span></div>
+                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@resource.Id">Preview resource <span aria-hidden="true">→</span></a>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}

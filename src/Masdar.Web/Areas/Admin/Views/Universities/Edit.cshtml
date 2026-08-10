@@ -1,0 +1,10 @@
+@model UniversityInputModel
+@{ ViewData["Title"] = Model.Id == 0 ? "Add university" : "Edit university"; }
+<partial name="_AdminNav" />
+<header class="page-head"><div><span class="eyebrow">Academic catalog</span><h1>@ViewData["Title"]</h1><p>Keep institutional information accurate and discoverable.</p></div></header>
+<form method="post" class="card edit-form">
+    <input asp-for="Id" type="hidden" /><div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+    <div class="form-grid"><div class="field full"><label asp-for="Name"></label><input asp-for="Name" /><span asp-validation-for="Name"></span></div><div class="field"><label asp-for="Location"></label><input asp-for="Location" /></div><div class="field"><label asp-for="WebsiteUrl"></label><input asp-for="WebsiteUrl" /></div><label class="check-row"><input asp-for="IsActive" /> Active</label></div>
+    <div class="form-actions"><a class="btn btn-secondary" asp-action="Index">Cancel</a><button class="btn btn-primary" type="submit">Save university</button></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
