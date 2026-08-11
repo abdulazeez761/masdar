@@ -44,7 +44,8 @@ public sealed record TutorExchange(
     IReadOnlyList<TutorAnswerSection> Sections,
     IReadOnlyList<TutorSourceCitation> Citations,
     IReadOnlyList<string> FollowUpQuestions,
-    bool IsOutOfScope = false);
+    bool IsOutOfScope = false,
+    bool IsServiceUnavailable = false);
 
 public sealed record TutorAskResult(
     TutorWorkspace Workspace,

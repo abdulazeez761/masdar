@@ -31,7 +31,7 @@ For a task-oriented walkthrough, required configuration, development credentials
 | Authorization | Server-enforced role, authenticated mutation, and ownership rules with antiforgery protection |
 | File upload | PDF/DOCX up to 10 MB with extension, MIME, signature, path, hash, and DOCX-structure validation |
 | Discovery | Asynchronous SQL-backed search, filters, sorting, saved-only queries, and pagination |
-| Tutor | Deterministic answers grounded in published course resources with source citations |
+| Tutor | Gemini-powered RAG over extracted PDF/DOCX chunks, semantic embeddings, guarded prompts, and source citations |
 | Administration | Protected dashboard plus user, university, major, course, resource, opportunity, and audit management |
 | Audit/reputation | Durable activity log and transactional reputation ledger |
 
@@ -90,7 +90,9 @@ Students can post resource requests, attach a reputation bounty, vote to priorit
 
 ### Course-aware AI tutor
 
-The tutor always has an active course context. It offers topic-aware prompts, answers course questions, cites the published resource it used, and can be launched directly from a resource preview. The MVP uses deterministic local grounding; an external-provider evolution is described in [AI and retrieval design](#ai-and-retrieval-design).
+The tutor always has an active course context. It extracts and chunks the active course's published PDF/DOCX resources, creates Gemini embeddings, retrieves the most relevant passages by cosine similarity, and asks Gemini to answer only from that evidence with inline citations. The in-memory index is keyed by each resource's SHA-256 hash, so unchanged resources are reused and changed resources are re-indexed.
+
+The Gemini free tier is intended here for prototype/demo data. Review Google's current data-use terms before uploading real student or confidential material; use an appropriate paid/enterprise setup and privacy review for production.
 
 ## How to use the project
 
@@ -100,6 +102,7 @@ The tutor always has an active course context. It offers topic-aware prompts, an
 - SQL Server LocalDB, SQL Server Developer/Express, or an accessible Azure SQL database
 - EF Core CLI 8.x for creating/updating migrations
 - A current version of Chrome, Edge, Firefox, or Safari
+- A Gemini API key from Google AI Studio for the AI tutor (the Gemini API has a limited free tier suitable for a prototype)
 
 ### Start the application
 
@@ -415,7 +418,7 @@ Local disk storage is acceptable for development. Azure Blob Storage or another 
 
 ### AI and retrieval design
 
-The production tutor should use retrieval-augmented generation, not send every course file to a model on every question.
+The implemented prototype uses retrieval-augmented generation and does not send every course file to the generation model on every question.
 
 1. Accept an authenticated user question and explicit course/resource context.
 2. Retrieve only approved, malware-scanned, text-extracted chunks from the authorized course.
@@ -495,7 +498,7 @@ Every list should be server-filtered and paginated. Destructive actions require 
 | Render functions | Views, partials, ViewModels, and small progressive-enhancement scripts |
 | `localStorage` interactions | SQL Server records scoped to the authenticated user |
 | `runtimeFiles` map | Private file-storage adapter and `StudyResource` storage metadata |
-| Simulated tutor | Retrieval service plus configurable AI provider |
+| Simulated tutor | Extracted document chunks, Gemini embeddings, semantic retrieval, and grounded Gemini generation |
 | Hard-coded “Student Ahmed” | `ApplicationUser` from ASP.NET Core Identity |
 | Inline quality totals | Transaction-safe user actions and server-computed aggregates |
 | Immediate demo publish | Published-but-unverified resource with scan/moderation gates |
@@ -513,7 +516,7 @@ The solution is ready to restore, migrate, seed, and run. Development seeding is
 - .NET SDK matching the committed target framework
 - SQL Server Developer/Express, SQL Server in a local container, or an accessible Azure SQL database
 - EF Core command-line tools matching the project's EF Core major version
-- Optional external AI/private object-storage credentials only when replacing the built-in MVP adapters
+- Gemini API key for the RAG tutor; private object-storage credentials remain optional
 
 ### Configuration
 
@@ -532,9 +535,10 @@ For local development, use .NET user secrets:
 ```powershell
 dotnet user-secrets init --project .\src\Masdar.Web\Masdar.Web.csproj
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=(localdb)\MSSQLLocalDB;Database=MasdarMvp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True" --project .\src\Masdar.Web\Masdar.Web.csproj
+dotnet user-secrets set "Rag:ApiKey" "<your-gemini-api-key>" --project .\src\Masdar.Web\Masdar.Web.csproj
 ```
 
-Use environment variables in hosted environments, for example `ConnectionStrings__DefaultConnection`. Configure AI/storage secrets the same way. Do not add real credentials to either `appsettings.json` or `appsettings.Development.json`.
+Use environment variables in hosted environments, for example `ConnectionStrings__DefaultConnection` and `GEMINI_API_KEY` (or `Rag__ApiKey`). Do not add real credentials to either `appsettings.json` or `appsettings.Development.json`.
 
 ### Restore, migrate, seed, and run
 
@@ -614,10 +618,10 @@ dotnet publish .\src\Masdar.Web\Masdar.Web.csproj -c Release -o .\artifacts\publ
 The MVP is intentionally a modular monolith. Natural next production steps are:
 
 1. replace local file storage with private Azure Blob Storage and a real malware-scanning queue;
-2. replace deterministic tutor generation with a configured retrieval/embedding and AI-provider adapter;
+2. persist the current in-memory Gemini vector index in a production vector database and move indexing to a background worker;
 3. add verified email delivery, account recovery branding, and production administrator provisioning;
 4. add distributed rate limiting, CSP reporting, centralized telemetry, and dependency health checks;
-5. add background text extraction/indexing for approved PDF/DOCX resources; and
+5. add OCR fallback and background text extraction/indexing for scanned PDF resources; and
 6. add CI/CD migration, backup, deployment-slot, and rollback automation.
 
 The current MVP builds cleanly, applies its migration to an empty database, seeds usable development data, enforces authenticated and Admin operations server-side, stores uploaded files privately, and provides production configuration/deployment guidance.

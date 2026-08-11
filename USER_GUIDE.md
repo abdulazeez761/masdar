@@ -10,11 +10,11 @@ This guide explains how to run and use MASDAR, which configuration values are re
 | SQL Server or SQL Server LocalDB | Yes | Stores users, courses, resources, progress, requests, opportunities, and audit records |
 | `ConnectionStrings:DefaultConnection` | Yes | Tells EF Core which SQL Server database to use |
 | `dotnet-ef` 8.x CLI | Optional | Needed only when applying or creating migrations manually |
-| AI API token | No | The built-in course tutor works locally without an external AI service |
+| Gemini API key | Yes for tutor | Powers semantic embeddings and grounded answer generation; the rest of MASDAR works without it |
 | Cloud-storage token | No | Development/MVP uploads use private local file storage |
 | Email-provider token | No | Email confirmation is disabled in the current MVP |
 
-The application will not start without a database connection string. No external token is required for the default feature set.
+The application will not start without a database connection string. Browsing and resource workflows do not require an external token, but the AI tutor requires a Gemini API key.
 
 ## 2. Quick start
 
@@ -86,9 +86,15 @@ Only PDF and DOCX files are accepted. MASDAR validates file extension, declared 
 
 ### Course tutor / RAG
 
-No OpenAI, Azure OpenAI, or other AI token is required. The current tutor retrieves published and validated resources only from the student's active course, ranks relevant material, and produces course-specific explanations, examples, quizzes, misconceptions, study guidance, and citations locally.
+Set a Gemini API key using .NET user secrets; never commit it to configuration:
 
-Do not add an `OPENAI_API_KEY` or similar secret unless a future provider adapter is implemented. A token placed in configuration today is not consumed by the application.
+```powershell
+dotnet user-secrets set "Rag:ApiKey" "<your-gemini-api-key>" --project .\src\Masdar.Web\Masdar.Web.csproj
+```
+
+The tutor reads published and validated PDF/DOCX files from the active course, chunks their text, retrieves relevant passages with Gemini embeddings, and sends only those passages to Gemini for a grounded answer. `GEMINI_API_KEY` or `Rag__ApiKey` can be used in hosted environments. Without a key, the tutor shows a configuration status while the rest of the application remains available.
+
+Use only non-sensitive demonstration material with the Gemini free tier. A production deployment should complete a privacy review and use provider terms suitable for real student data.
 
 ### Cloud storage
 

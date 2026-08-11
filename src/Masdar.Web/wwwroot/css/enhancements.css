@@ -12,7 +12,7 @@ dd,
 td { line-height: 1.58; }
 
 small,
-.small { font-size: .79rem !important; }
+.small { font-size: var(--text-xs) !important; }
 
 .side-link { min-height: 47px; font-size: .91rem; }
 .side-label { font-size: .72rem; }
@@ -79,7 +79,7 @@ textarea { min-height: 120px; }
 /* Arabic and RTL layout. Dynamic domain data remains in its source language. */
 html[dir="rtl"] body {
   direction: rtl;
-  font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-sans);
   text-align: right;
 }
 
@@ -132,11 +132,31 @@ html[dir="rtl"] .pagination { padding-right: 0; }
 html[dir="rtl"] .form-check { padding-right: 1.5em; padding-left: 0; }
 html[dir="rtl"] .form-check .form-check-input { float: right; margin-right: -1.5em; margin-left: 0; }
 
-/* The prototype was authored at a very dense desktop scale. Keep metadata and
-   interactive copy readable without flattening the established heading scale. */
-.prototype-study-page :where(a, button, input, select, textarea, label, small, p, span, time, li, td, th),
-body[data-area="Admin"] :where(a, button, input, select, textarea, label, small, p, span, time, li, td, th) {
-  font-size: max(.82rem, 1em) !important;
+/* A shared type scale for prototype, account, and admin pages. The old rule used
+   nested 1em values, which made text grow or shrink depending on its parent. */
+.prototype-study-page :where(p, li, dd, td),
+body[data-area="Admin"] :where(p, li, dd, td) {
+  font-size: .9375rem !important;
+}
+
+.prototype-study-page :where(a, button, input, select, textarea, label),
+body[data-area="Admin"] :where(a, button, input, select, textarea, label) {
+  font-size: var(--text-sm) !important;
+}
+
+.prototype-study-page :where(h1, h2, h3, h4) a,
+body[data-area="Admin"] :where(h1, h2, h3, h4) a {
+  font-size: inherit !important;
+}
+
+.prototype-study-page :where(small, time, th, .badge, [class*="-badge"], [class*="-meta"], [class*="-kicker"], [class*="-label"]),
+body[data-area="Admin"] :where(small, time, th, .badge, [class*="-badge"], [class*="-meta"], [class*="-kicker"], [class*="-label"]) {
+  font-size: var(--text-xs) !important;
+}
+
+.prototype-study-page :where(.course-focus-item, .focus-complete-state) strong,
+.prototype-study-page :where(.catalog-course-card, .course-material-card, .prototype-roadmap-node, .prototype-career-card, .prototype-opportunity-card) h3 {
+  font-size: .9375rem !important;
 }
 
 .prototype-course-actions form .course-tutor-button {

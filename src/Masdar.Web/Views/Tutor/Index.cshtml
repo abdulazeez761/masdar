@@ -58,7 +58,7 @@ else
                 <div>
                     <span class="tutor-online-dot" aria-hidden="true"></span>
                     <strong>Masdar AI tutor</strong>
-                    <small>Grounded in @course.Code only</small>
+                    <small>Gemini semantic RAG · grounded in @course.Code only</small>
                 </div>
                 <span class="tutor-source-count">@course.PublishedResourceCount sources available</span>
             </div>
@@ -81,12 +81,16 @@ else
                         <span class="tutor-avatar tutor-avatar-user" aria-hidden="true">You</span>
                     </article>
 
-                    <article class="tutor-message tutor-message-assistant @(Model.Exchange.IsOutOfScope ? "tutor-message-redirect" : "")">
+                    <article class="tutor-message tutor-message-assistant @(Model.Exchange.IsOutOfScope || Model.Exchange.IsServiceUnavailable ? "tutor-message-redirect" : "")">
                         <span class="tutor-avatar" aria-hidden="true">✦</span>
                         <div class="tutor-bubble tutor-answer" dir="auto">
                             @if (Model.Exchange.IsOutOfScope)
                             {
                                 <span class="tutor-scope-badge">Outside active course</span>
+                            }
+                            else if (Model.Exchange.IsServiceUnavailable)
+                            {
+                                <span class="tutor-scope-badge">AI service unavailable</span>
                             }
                             <p class="tutor-answer-lead">@Model.Exchange.Lead</p>
                             @foreach (var answerSection in Model.Exchange.Sections)
@@ -117,7 +121,7 @@ else
                                     </div>
                                 </section>
                             }
-                            else if (!Model.Exchange.IsOutOfScope)
+                            else if (!Model.Exchange.IsOutOfScope && !Model.Exchange.IsServiceUnavailable)
                             {
                                 <div class="alert alert-warning mb-0">No eligible source was available, so the tutor did not invent a citation.</div>
                             }
@@ -182,7 +186,7 @@ else
                 <span class="tutor-trust-icon" aria-hidden="true">✓</span>
                 <div>
                     <h2>Course-grounded by design</h2>
-                    <p>Drafts, rejected uploads, unvalidated files, and resources from other courses are excluded before ranking.</p>
+                    <p>Gemini embeddings retrieve passages from file contents. Drafts, rejected uploads, unvalidated files, and resources from other courses are excluded before indexing.</p>
                 </div>
             </section>
 

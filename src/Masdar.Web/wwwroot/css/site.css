@@ -41,13 +41,19 @@
   --sidebar: 256px;
   --topbar: 76px;
   --ease: 180ms ease;
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", "Noto Sans Arabic", "Noto Sans", Arial, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI", "Noto Sans Arabic", "Noto Sans", Arial, sans-serif;
+  --text-xs: .8125rem;
+  --text-sm: .875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
   --bs-body-color: var(--ink-900);
   --bs-body-bg: var(--canvas);
   --bs-border-color: var(--line);
   --bs-primary: var(--blue-600);
   --bs-primary-rgb: 36, 107, 253;
   --bs-secondary-color: var(--ink-500);
-  font-family: "Segoe UI Variable Text", "Segoe UI", "Noto Sans", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Admin and account surfaces */
@@ -266,7 +272,7 @@ body {
   background: var(--canvas);
   color: var(--ink-900);
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--text-base);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -321,7 +327,7 @@ h5,
 h6 {
   margin-top: 0;
   color: var(--ink-900);
-  font-family: "Segoe UI Variable Display", "Segoe UI", "Noto Sans", sans-serif;
+  font-family: var(--font-display);
   font-weight: 720;
   letter-spacing: -0.022em;
   text-wrap: balance;
