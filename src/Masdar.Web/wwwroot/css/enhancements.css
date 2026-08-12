@@ -1,82 +1,467 @@
-/* Global readability, bilingual direction, and shell refinements. */
-html { font-size: 16px; }
+/* ==========================================================================
+   MASDAR — Elevated UI Enhancements & Design System Refinements
+   Focus on details, proportions, component sizing, and visual aesthetics.
+   ========================================================================== */
+
+/* --- Core Root & Layout Sizing Variables --- */
+:root {
+  --sidebar: 260px;
+  --topbar: 72px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --ease-smooth: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-glow: 0 8px 24px rgba(36, 107, 253, 0.28);
+}
+
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   font-size: 1rem;
   line-height: 1.58;
 }
 
-p,
-li,
-dd,
-td { line-height: 1.58; }
-
-small,
-.small { font-size: var(--text-xs) !important; }
-
-.side-link { min-height: 47px; font-size: .91rem; }
-.side-label { font-size: .72rem; }
-.current-course-name { font-size: .85rem; line-height: 1.35; }
-.current-course-meta { font-size: .72rem; line-height: 1.35; }
-.tutor-side-card strong { font-size: .9rem; }
-.tutor-side-card p { font-size: .77rem; line-height: 1.48; }
-
-.topbar {
-  min-height: var(--topbar);
-  height: auto;
-  padding-block: .55rem;
+p, li, dd, td {
+  line-height: 1.58;
 }
 
-.top-search { min-width: 220px; }
-.top-search input { font-size: .9rem; }
-.topbar-actions { min-width: 0; flex-shrink: 0; }
-.course-context-pill { width: min(270px, 24vw); min-width: 165px; }
-.context-copy strong { font-size: .79rem; }
-.context-copy span { font-size: .69rem; }
-.user-menu-trigger { max-width: 220px; }
-.user-copy { min-width: 0; }
-.user-copy strong { font-size: .79rem; }
-.user-copy span { font-size: .69rem; }
+small, .small {
+  font-size: var(--text-xs) !important;
+}
+
+/* ==========================================================================
+   SIDEBAR NAVIGATION — Refined Sizing, Proportions & Aesthetics
+   ========================================================================== */
+.sidebar {
+  width: var(--sidebar);
+  padding: 24px 18px 20px;
+  background: var(--navy-950);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Brand Header */
+.brand {
+  gap: 12px;
+  padding: 0 6px 28px;
+  transition: transform var(--ease-smooth);
+}
+
+.brand:hover {
+  transform: translateY(-1px);
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #246bfd 0%, #1754d1 100%);
+  box-shadow: 0 8px 22px rgba(36, 107, 253, 0.38);
+}
+
+.brand-mark svg {
+  width: 22px;
+  height: 22px;
+}
+
+.brand-name {
+  font-size: 1.2rem;
+  font-weight: 850;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+}
+
+.brand-ar {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #8da9e9;
+}
+
+/* Navigation Section Label */
+.side-label {
+  padding: 0 12px 10px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.side-nav {
+  gap: 6px;
+}
+
+/* Side Navigation Links */
+.side-link {
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+  gap: 12px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 650;
+  transition: color var(--ease-smooth), background-color var(--ease-smooth), transform var(--ease-smooth);
+}
+
+.side-link svg {
+  width: 20px;
+  height: 20px;
+  transition: transform var(--ease-smooth);
+}
+
+.side-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+.side-link.active {
+  background: linear-gradient(135deg, #246bfd 0%, #1a5ce0 100%);
+  color: #ffffff;
+  font-weight: 750;
+  box-shadow: 0 8px 22px rgba(36, 107, 253, 0.35);
+}
+
+.side-link.active svg {
+  stroke-width: 2;
+}
+
+.sidebar-spacer {
+  min-height: 24px;
+  flex: 1;
+}
+
+/* Sidebar AI Tutor Section */
+.tutor-side-card {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(23, 54, 115, 0.95), rgba(13, 29, 66, 0.98));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  transition: border-color var(--ease-smooth), transform var(--ease-smooth);
+}
+
+.tutor-side-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.tutor-side-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+}
+
+.tutor-side-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tutor-side-card strong {
+  margin-bottom: 4px;
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: #ffffff;
+}
+
+.tutor-side-card p {
+  font-size: 0.77rem;
+  line-height: 1.5;
+  color: #a0aec0;
+}
+
+.tutor-side-button {
+  min-height: 40px;
+  margin-top: 14px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: background-color var(--ease-smooth), transform var(--ease-smooth), box-shadow var(--ease-smooth);
+}
+
+.tutor-side-button:hover {
+  background: #f0f6ff;
+  color: #1740b6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+}
+
+/* ==========================================================================
+   TOPBAR HEADER — Modern Glassmorphism & Controls Sizing
+   ========================================================================== */
+.topbar {
+  min-height: var(--topbar);
+  height: var(--topbar);
+  padding: 0 32px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Topbar Global Search */
+.top-search {
+  max-width: 560px;
+}
+
+.top-search > svg {
+  width: 18px;
+  height: 18px;
+  left: 14px;
+}
+
+.top-search input {
+  height: 44px;
+  padding: 0 16px 0 44px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  font-size: 0.88rem;
+  transition: border-color var(--ease-smooth), box-shadow var(--ease-smooth), background-color var(--ease-smooth);
+}
+
+.top-search input:focus {
+  border-color: var(--blue-500);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px rgba(36, 107, 253, 0.12);
+}
+
+.topbar-actions {
+  gap: 10px;
+}
+
+/* Toggle Buttons (Theme & Language) */
+.top-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-700);
+  transition: border-color var(--ease-smooth), background-color var(--ease-smooth), color var(--ease-smooth), transform var(--ease-smooth);
+}
+
+.top-icon:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-tint);
+  color: var(--blue-600);
+  transform: translateY(-1px);
+}
 
 .language-toggle-label {
-  display: block;
-  color: currentColor;
   font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 850;
   line-height: 1;
 }
 
-.page-head p,
-.hero-desc { font-size: 1rem; line-height: 1.65; }
-.section-head p { font-size: .88rem; }
-.card p { line-height: 1.58; }
-
-.btn {
-  --bs-btn-font-size: .9rem;
-  min-height: 42px;
-  font-weight: 750;
+/* User Account Trigger & Avatar */
+.user-menu-trigger {
+  min-height: 44px;
+  height: 44px;
+  padding: 4px 12px 4px 5px;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  transition: border-color var(--ease-smooth), background-color var(--ease-smooth);
 }
 
-.btn-small { min-height: 36px; font-size: .8rem; }
+.user-menu-trigger:hover,
+.user-menu-trigger[aria-expanded="true"] {
+  border-color: var(--line-strong);
+  background: var(--surface-tint);
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #246bfd 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(36, 107, 253, 0.25);
+}
+
+.user-copy strong {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+.user-copy span {
+  font-size: 0.6875rem;
+  color: var(--ink-500);
+}
+
+.user-chevron {
+  width: 14px;
+  height: 14px;
+}
+
+/* Account Dropdown Menu */
+.account-menu {
+  width: 260px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  margin-top: 8px !important;
+}
+
+.account-menu .dropdown-item {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  gap: 10px;
+}
+
+.account-menu .dropdown-item svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ==========================================================================
+   BUTTONS, INPUTS & COMPONENT SIZING REFINEMENTS
+   ========================================================================== */
+.btn {
+  --bs-btn-font-size: 0.9rem;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border-radius: 12px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  transition: transform var(--ease-smooth), box-shadow var(--ease-smooth), background-color var(--ease-smooth);
+}
+
+.btn-primary {
+  box-shadow: 0 4px 14px rgba(36, 107, 253, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(36, 107, 253, 0.35);
+}
+
+.btn-small {
+  min-height: 38px;
+  padding: 0 0.9rem;
+  font-size: 0.8125rem;
+  border-radius: 10px;
+}
 
 .field label,
-label.form-label { font-size: .84rem; }
+label.form-label {
+  font-size: 0.84rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
 
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
-  min-height: 48px;
-  font-size: .95rem;
+  min-height: 46px;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  border: 1px solid var(--line);
+  transition: border-color var(--ease-smooth), box-shadow var(--ease-smooth);
 }
 
-textarea { min-height: 120px; }
-.data-table th { font-size: .75rem; }
-.data-table td { font-size: .9rem; }
-.badge { font-size: .72rem; }
-.mobile-link { font-size: .67rem; }
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 4px rgba(36, 107, 253, 0.12);
+}
 
-/* Arabic and RTL layout. Dynamic domain data remains in its source language. */
+textarea {
+  min-height: 120px;
+}
+
+/* Card Design & Details */
+.card,
+.masdar-card,
+.catalog-course-card,
+.resource-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  transition: border-color var(--ease-smooth), box-shadow var(--ease-smooth), transform var(--ease-smooth);
+}
+
+.card:hover,
+.masdar-card:hover,
+.catalog-course-card:hover,
+.resource-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.page-head p,
+.hero-desc {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--ink-500);
+}
+
+.section-head p {
+  font-size: 0.9rem;
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 750;
+  padding: 0.35em 0.75em;
+  border-radius: 8px;
+}
+
+/* Table Sizing */
+.data-table th {
+  font-size: 0.75rem;
+  padding: 1rem;
+}
+
+.data-table td {
+  font-size: 0.9rem;
+  padding: 1rem;
+}
+
+/* Mobile Nav Bar */
+.mobile-nav {
+  height: 62px;
+  background: var(--header-bg);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+}
+
+.mobile-link {
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+
+.mobile-link.active {
+  color: var(--blue-600);
+  font-weight: 800;
+}
+
+/* ==========================================================================
+   RTL & ARABIC LANGUAGE SUPPORT
+   ========================================================================== */
 html[dir="rtl"] body {
   direction: rtl;
   font-family: var(--font-sans);
@@ -85,6 +470,13 @@ html[dir="rtl"] body {
 
 html[dir="rtl"] .sidebar {
   inset: 0 0 0 auto;
+  border-right: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+html[dir="rtl"] .side-link:hover {
+  transform: translateX(-3px);
 }
 
 html[dir="rtl"] .app-frame {
@@ -101,8 +493,6 @@ html[dir="rtl"] select {
   text-align: right;
 }
 
-html[dir="rtl"] .course-arrow,
-html[dir="rtl"] .course-context-pill > svg,
 html[dir="rtl"] .user-chevron,
 html[dir="rtl"] .section-link svg,
 html[dir="rtl"] .btn svg[data-directional] {
@@ -110,13 +500,13 @@ html[dir="rtl"] .btn svg[data-directional] {
 }
 
 html[dir="rtl"] .top-search > svg {
-  right: 15px;
+  right: 14px;
   left: auto;
 }
 
 html[dir="rtl"] .top-search input {
-  padding-right: 43px;
-  padding-left: 14px;
+  padding-right: 44px;
+  padding-left: 16px;
 }
 
 html[dir="rtl"] .dropdown-menu-end {
@@ -126,97 +516,40 @@ html[dir="rtl"] .dropdown-menu-end {
 }
 
 html[dir="rtl"] .form-actions,
-html[dir="rtl"] .table-actions { direction: rtl; }
-
-html[dir="rtl"] .pagination { padding-right: 0; }
-html[dir="rtl"] .form-check { padding-right: 1.5em; padding-left: 0; }
-html[dir="rtl"] .form-check .form-check-input { float: right; margin-right: -1.5em; margin-left: 0; }
-
-/* A shared type scale for prototype, account, and admin pages. The old rule used
-   nested 1em values, which made text grow or shrink depending on its parent. */
-.prototype-study-page :where(p, li, dd, td),
-body[data-area="Admin"] :where(p, li, dd, td) {
-  font-size: .9375rem !important;
+html[dir="rtl"] .table-actions {
+  direction: rtl;
 }
 
-.prototype-study-page :where(a, button, input, select, textarea, label),
-body[data-area="Admin"] :where(a, button, input, select, textarea, label) {
-  font-size: var(--text-sm) !important;
+html[dir="rtl"] .pagination {
+  padding-right: 0;
 }
 
-.prototype-study-page :where(h1, h2, h3, h4) a,
-body[data-area="Admin"] :where(h1, h2, h3, h4) a {
-  font-size: inherit !important;
+html[dir="rtl"] .form-check {
+  padding-right: 1.5em;
+  padding-left: 0;
 }
 
-.prototype-study-page :where(small, time, th, .badge, [class*="-badge"], [class*="-meta"], [class*="-kicker"], [class*="-label"]),
-body[data-area="Admin"] :where(small, time, th, .badge, [class*="-badge"], [class*="-meta"], [class*="-kicker"], [class*="-label"]) {
-  font-size: var(--text-xs) !important;
+html[dir="rtl"] .form-check .form-check-input {
+  float: right;
+  margin-right: -1.5em;
+  margin-left: 0;
 }
 
-.prototype-study-page :where(.course-focus-item, .focus-complete-state) strong,
-.prototype-study-page :where(.catalog-course-card, .course-material-card, .prototype-roadmap-node, .prototype-career-card, .prototype-opportunity-card) h3 {
-  font-size: .9375rem !important;
-}
-
-.prototype-course-actions form .course-tutor-button {
-  border-color: transparent !important;
-  background: var(--blue-600) !important;
-}
-
-.course-ai-activate,
-.resource-tutor-form,
-.resource-context-tutor-form { margin: 0; }
-
-.course-ai-activate button {
-  display: flex;
-  width: 100%;
-  min-height: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1.25rem;
-  border: 0;
-  border-radius: .7rem;
-  color: var(--blue-700);
-  background: #fff;
-  font-weight: 850;
-}
-
-.resource-tutor-form .resource-tutor-cta {
-  width: 100%;
-  border: 0;
-  text-align: start;
-}
-
-.resource-context-tutor-form button {
-  border: 0;
-  padding: 0;
-  color: var(--blue-600);
-  background: transparent;
-  font-weight: 850;
-}
-
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS & ADAPTATION
+   ========================================================================== */
 @media (max-width: 1180px) {
   .user-copy { display: none; }
   .user-menu-trigger { padding-inline: 4px; }
-  .course-context-pill { width: 210px; }
 }
 
 @media (max-width: 960px) {
   html[dir="rtl"] .app-frame { margin-right: 0; }
-  .topbar { min-height: 66px; }
-  .course-context-pill { width: min(190px, 36vw); }
-  .context-copy strong { font-size: .75rem; }
-  .context-copy span { font-size: .65rem; }
+  .topbar { padding: 0 18px; }
 }
 
 @media (max-width: 560px) {
-  html { font-size: 16px; }
-  .topbar-actions { gap: 5px; }
-  .language-toggle,
-  .theme-toggle { width: 38px; height: 38px; }
-  .course-context-pill { min-width: 0; width: min(152px, 42vw); }
-  .context-copy span { display: none; }
-  .page-head p,
-  .hero-desc { font-size: .94rem; }
+  .topbar-actions { gap: 6px; }
+  .top-icon { width: 38px; height: 38px; }
+  .page-head p, .hero-desc { font-size: 0.94rem; }
 }

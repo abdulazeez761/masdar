@@ -19,9 +19,15 @@ public sealed class ContributionsController(
     UserManager<ApplicationUser> userManager) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Create(int? courseId, long? requestId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(int? courseId, string? type, long? requestId, CancellationToken cancellationToken)
     {
-        var model = new ContributionCreateViewModel { CourseId = courseId, RequestId = requestId };
+        var model = new ContributionCreateViewModel
+        {
+            CourseId = courseId,
+            Type = ResourcesController.ParseResourceType(type)?.ToString(),
+            RequestId = requestId
+        };
+
         if (requestId.HasValue)
         {
             var request = await dbContext.ResourceRequests.AsNoTracking()
@@ -33,8 +39,12 @@ public sealed class ContributionsController(
 
             model.CourseId = request.CourseId;
             model.Type = request.DesiredResourceType.ToString();
-            model.Title = $"Fulfillment: {request.Title}";
-            model.Description = request.Description ?? $"Material contributed for community request #{request.Id}.";
+            var title = $"Fulfillment: {request.Title}";
+            model.Title = title.Length > 220 ? title[..220] : title;
+            var desc = request.Description?.Trim();
+            model.Description = (!string.IsNullOrWhiteSpace(desc) && desc.Length >= 10)
+                ? desc
+                : $"Material contributed for community request #{request.Id}.";
         }
 
         await PopulateOptionsAsync(model, cancellationToken);
@@ -63,7 +73,7 @@ public sealed class ContributionsController(
             var tags = (model.Tags ?? "")
                 .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Take(10)
+                .Take(8)
                 .ToArray();
             var resourceId = await resourceService.CreateAsync(new CreateResourceCommand(
                 model.CourseId.Value,

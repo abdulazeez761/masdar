@@ -133,13 +133,13 @@ public sealed class ContributionCreateViewModel
     [Display(Name = "Resource type")]
     public string? Type { get; set; }
 
-    [Required, StringLength(160, MinimumLength = 4)]
+    [Required, StringLength(220, MinimumLength = 4)]
     public string Title { get; set; } = "";
 
-    [Required, StringLength(80)]
+    [Required, StringLength(40, MinimumLength = 2)]
     public string Semester { get; set; } = "";
 
-    [Required, StringLength(2000, MinimumLength = 20)]
+    [Required, StringLength(6000, MinimumLength = 10)]
     public string Description { get; set; } = "";
 
     [Display(Name = "Tags")]
@@ -147,13 +147,13 @@ public sealed class ContributionCreateViewModel
     public string? Tags { get; set; }
 
     [Display(Name = "Tutor context (optional)")]
-    [StringLength(8000)]
+    [StringLength(6000)]
     public string? TutorContext { get; set; }
 
     [Required(ErrorMessage = "Choose a PDF or DOCX file.")]
     public IFormFile? File { get; set; }
 
-    [Range(typeof(bool), "true", "true", ErrorMessage = "You must confirm that you can share this material.")]
+    [MustBeTrue(ErrorMessage = "You must confirm that you can share this material.")]
     public bool HasSharingConsent { get; set; }
 
     public long? RequestId { get; set; }

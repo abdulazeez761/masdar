@@ -1,6 +1,4 @@
 @using Microsoft.AspNetCore.Identity
-@inject UserManager<Masdar.Web.Domain.Entities.ApplicationUser> ShellUserManager
-@inject Masdar.Web.Services.ICourseService ShellCourseService
 @{
     var routeController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
     var routeAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
@@ -8,26 +6,6 @@
     var pageTitle = ViewData["Title"]?.ToString();
     var documentTitle = string.IsNullOrWhiteSpace(pageTitle) ? "MASDAR" : $"{pageTitle} | MASDAR";
     var bodyClass = ViewData["BodyClass"]?.ToString() ?? string.Empty;
-
-    var shellUserId = ShellUserManager.GetUserId(User);
-    Masdar.Web.Services.CourseListItem? shellCourse = null;
-    if (!string.IsNullOrWhiteSpace(shellUserId))
-    {
-        shellCourse = await ShellCourseService.GetActiveCourseAsync(shellUserId, Context.RequestAborted);
-    }
-
-    var viewedCourseCode = ViewData["ActiveCourseCode"]?.ToString()
-        ?? ViewData["CourseCode"]?.ToString();
-    var viewedCourseName = ViewData["ActiveCourseName"]?.ToString()
-        ?? ViewData["CourseName"]?.ToString();
-    // For signed-in students the shell must reflect persisted tutor context, not
-    // whichever course or resource happens to be open in the current request.
-    var activeCourseCode = shellCourse?.Code
-        ?? (string.IsNullOrWhiteSpace(shellUserId) ? viewedCourseCode : null)
-        ?? "No active course";
-    var activeCourseName = shellCourse?.Name
-        ?? (string.IsNullOrWhiteSpace(shellUserId) ? viewedCourseName : null)
-        ?? "Choose a course to begin";
 
     Func<string, bool> controllerIs = name =>
         string.IsNullOrWhiteSpace(routeArea)
@@ -146,21 +124,6 @@
             </a>
         </nav>
 
-        <div class="side-divider"></div>
-        <div class="side-label-row">
-            <span class="side-label" data-i18n="currentCourse">Current course</span>
-            <a class="side-action-link" asp-area="" asp-controller="Courses" asp-action="Index" data-i18n="switchCourse">Switch</a>
-        </div>
-        <a class="current-course-card" asp-area="" asp-controller="Courses" asp-action="@(shellCourse is null ? "Index" : "Details")" asp-route-id="@shellCourse?.Id">
-            <span class="current-course-top">
-                <span class="course-code-dark">@activeCourseCode</span>
-                <svg class="course-arrow" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
-            </span>
-            <span class="current-course-name">@activeCourseName</span>
-            <span class="current-course-meta" data-i18n="openCourseWorkspace">Open course materials and roadmap</span>
-            <span class="mini-progress" aria-hidden="true"><span style="width: 35%"></span></span>
-        </a>
-
         <div class="sidebar-spacer"></div>
         <section class="tutor-side-card" aria-labelledby="tutor-card-title">
             <span class="tutor-side-icon"><svg aria-hidden="true"><use href="#icon-sparkles"></use></svg></span>
@@ -184,11 +147,6 @@
             </form>
 
             <div class="topbar-actions">
-                <a class="course-context-pill" asp-area="" asp-controller="Courses" asp-action="@(shellCourse is null ? "Index" : "Details")" asp-route-id="@shellCourse?.Id" aria-label="Open current course">
-                    <span class="context-dot" aria-hidden="true"></span>
-                    <span class="context-copy"><strong>@activeCourseCode</strong><span>@activeCourseName</span></span>
-                    <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
-                </a>
                 <button class="top-icon language-toggle" type="button" data-language-toggle aria-label="Switch to Arabic" title="Switch language">
                     <span class="language-toggle-label" aria-hidden="true">ع</span>
                 </button>

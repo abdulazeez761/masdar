@@ -12,7 +12,7 @@
         <form asp-action="Create" method="post" enctype="multipart/form-data" class="card p-4" novalidate>
             @Html.AntiForgeryToken()
             <input asp-for="RequestId" type="hidden" />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div asp-validation-summary="All" class="text-danger" role="alert"></div>
 
             <section aria-labelledby="file-heading" class="mb-4">
                 <div class="wizard-header"><span class="badge badge-blue">Step 1</span><h2 id="file-heading" class="h5 mt-2">Choose your file</h2><p>PDF and DOCX only, up to 10 MB.</p></div>
@@ -26,7 +26,7 @@
                     <div class="col-md-6 field"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Model.Types" class="form-select"><option value="">Choose a type</option></select><span asp-validation-for="Type" class="text-danger"></span></div>
                     <div class="col-12 field"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control" placeholder="e.g. Midterm Exam 2025 — Solved" /><span asp-validation-for="Title" class="text-danger"></span></div>
                     <div class="col-md-5 field"><label asp-for="Semester" class="form-label"></label><input asp-for="Semester" class="form-control" placeholder="Spring 2026" /><span asp-validation-for="Semester" class="text-danger"></span></div>
-                    <div class="col-md-7 field"><label asp-for="Tags" class="form-label"></label><input asp-for="Tags" class="form-control" placeholder="integration, series, midterm" /><div class="form-text">Separate up to ten short tags with commas.</div><span asp-validation-for="Tags" class="text-danger"></span></div>
+                    <div class="col-md-7 field"><label asp-for="Tags" class="form-label"></label><input asp-for="Tags" class="form-control" placeholder="integration, series, midterm" /><div class="form-text">Separate up to eight short tags with commas.</div><span asp-validation-for="Tags" class="text-danger"></span></div>
                     <div class="col-12 field"><label asp-for="Description" class="form-label"></label><textarea asp-for="Description" class="form-control" rows="4" placeholder="What is covered, and how should students use it?"></textarea><span asp-validation-for="Description" class="text-danger"></span></div>
                     <div class="col-12 field"><label asp-for="TutorContext" class="form-label"></label><textarea asp-for="TutorContext" class="form-control" rows="5" placeholder="Optional plain-text summary or key concepts that the tutor can cite."></textarea><span asp-validation-for="TutorContext" class="text-danger"></span></div>
                 </div>
@@ -48,4 +48,14 @@
     </aside>
 </div>
 
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        if (window.jQuery && $.validator && $.validator.unobtrusive) {
+            $.validator.addMethod("mustbetrue", function (value, element) {
+                return element.checked;
+            });
+            $.validator.unobtrusive.adapters.addBool("mustbetrue");
+        }
+    </script>
+}
