@@ -92,7 +92,7 @@ public sealed class ResourceService(
                 .OrderBy(x => x.Title)
                 .ThenBy(x => x.Id),
             _ => resources
-                .OrderByDescending(x => x.Ratings.Any() ? x.Ratings.Average(rating => rating.Value) : 0)
+                .OrderByDescending(x => x.Ratings.Select(r => (double?)r.Value).Average() ?? 0)
                 .ThenByDescending(x => x.Ratings.Count)
                 .ThenByDescending(x => x.HelpfulVotes.Count)
                 .ThenByDescending(x => x.Id)
@@ -110,7 +110,7 @@ public sealed class ResourceService(
                 x.Type,
                 x.Semester,
                 x.Uploader.DisplayName,
-                x.Ratings.Any() ? x.Ratings.Average(rating => rating.Value) : 0,
+                x.Ratings.Select(r => (double?)r.Value).Average() ?? 0,
                 x.Ratings.Count,
                 x.HelpfulVotes.Count,
                 x.VerificationStatus == ResourceVerificationStatus.Verified,
@@ -141,7 +141,7 @@ public sealed class ResourceService(
                 x.TutorContext,
                 x.UploaderId,
                 x.Uploader.DisplayName,
-                x.Ratings.Any() ? x.Ratings.Average(rating => rating.Value) : 0,
+                x.Ratings.Select(r => (double?)r.Value).Average() ?? 0,
                 x.Ratings.Count,
                 x.HelpfulVotes.Count,
                 userId == null
