@@ -8,11 +8,46 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrWhiteSpace(connectionString))
-    throw new InvalidOperationException("Connection string 'DefaultConnection' must be supplied through configuration or environment variables.");
+var rawConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+if (string.IsNullOrWhiteSpace(rawConnectionString))
+    throw new InvalidOperationException("Connection string 'DefaultConnection' or 'DATABASE_URL' must be supplied through configuration or environment variables.");
+
+var connectionString = rawConnectionString;
+if (connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+    connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+{
+    var databaseUri = new Uri(connectionString);
+    var userInfo = databaseUri.UserInfo.Split(':');
+    var user = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : "";
+    var pass = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+    var host = databaseUri.Host;
+    var port = databaseUri.Port > 0 ? databaseUri.Port : 5432;
+    var dbName = databaseUri.LocalPath.TrimStart('/');
+
+    connectionString = $"Host={host};Port={port};Database={dbName};Username={user};Password={pass};SSL Mode=Prefer;Trust Server Certificate=true;";
+}
+
+var dbProvider = builder.Configuration.GetValue<string>("Database:Provider")?.ToLowerInvariant();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    if (dbProvider is "npgsql" or "postgres" or "postgresql" ||
+        connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase) ||
+        connectionString.Contains("Username=", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseNpgsql(connectionString);
+    }
+    else if (dbProvider == "sqlite" || (connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) && !connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase)))
+    {
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        options.UseSqlServer(connectionString);
+    }
+});
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services

@@ -20,8 +20,7 @@ public static class DevelopmentDataSeeder
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
-        var environment = services.GetRequiredService<IHostEnvironment>();
-        if (!environment.IsDevelopment())
+        if (!configuration.GetValue<bool>("SeedData:Enabled"))
         {
             return;
         }
