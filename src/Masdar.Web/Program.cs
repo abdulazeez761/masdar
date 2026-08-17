@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 var rawConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
@@ -127,7 +129,16 @@ if (builder.Configuration.GetValue<bool>("Database:ApplyMigrations") ||
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     if (builder.Configuration.GetValue<bool>("Database:ApplyMigrations"))
-        await db.Database.MigrateAsync();
+    {
+        if (db.Database.IsSqlServer())
+        {
+            await db.Database.MigrateAsync();
+        }
+        else
+        {
+            await db.Database.EnsureCreatedAsync();
+        }
+    }
     if (builder.Configuration.GetValue<bool>("SeedData:Enabled"))
         await DevelopmentDataSeeder.SeedAsync(app.Services, builder.Configuration);
 }
