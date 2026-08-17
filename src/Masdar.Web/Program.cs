@@ -130,7 +130,7 @@ if (builder.Configuration.GetValue<bool>("Database:ApplyMigrations") ||
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     if (builder.Configuration.GetValue<bool>("Database:ApplyMigrations"))
     {
-        if (db.Database.IsSqlServer())
+        if (string.Equals(db.Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer", StringComparison.OrdinalIgnoreCase))
         {
             await db.Database.MigrateAsync();
         }
